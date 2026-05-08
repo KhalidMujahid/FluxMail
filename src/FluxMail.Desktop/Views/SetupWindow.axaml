@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FluxMail.Desktop.ViewModels"
+        x:Class="FluxMail.Desktop.Views.SetupWindow"
+        x:DataType="vm:SetupViewModel"
+        Title="FluxMail — First-time Setup"
+        Width="480" Height="620"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://FluxMail.Desktop/Assets/icon.png"
+        Background="#1E1E2E">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Brand header -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,48,0,32" Spacing="10">
+            <Border Width="72" Height="72" CornerRadius="36" Background="#CBA6F720" HorizontalAlignment="Center">
+                <TextBlock Text="F" FontSize="38" FontWeight="Bold" Foreground="#CBA6F7"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="FluxMail" FontSize="28" FontWeight="Bold" Foreground="#CDD6F4"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="Create your account to get started" FontSize="13" Foreground="#6C7086"
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Form -->
+        <StackPanel Grid.Row="1" Margin="48,0" Spacing="14">
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Full Name" FontSize="12" Foreground="#6C7086" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding FullName}" PlaceholderText="The Owner"
+                         Background="#313244" Foreground="#CDD6F4" CornerRadius="8"
+                         BorderBrush="#45475A" Padding="12,10" FontSize="14"/>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Email Address" FontSize="12" Foreground="#6C7086" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding Email}" PlaceholderText="you@example.com"
+                         Background="#313244" Foreground="#CDD6F4" CornerRadius="8"
+                         BorderBrush="#45475A" Padding="12,10" FontSize="14"/>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Password" FontSize="12" Foreground="#6C7086" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding Password}" PasswordChar="●"
+                         PlaceholderText="At least 6 characters"
+                         Background="#313244" Foreground="#CDD6F4" CornerRadius="8"
+                         BorderBrush="#45475A" Padding="12,10" FontSize="14"/>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Confirm Password" FontSize="12" Foreground="#6C7086" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●"
+                         PlaceholderText="Repeat your password"
+                         Background="#313244" Foreground="#CDD6F4" CornerRadius="8"
+                         BorderBrush="#45475A" Padding="12,10" FontSize="14"/>
+            </StackPanel>
+
+            <!-- Error message -->
+            <Border IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                    Background="#F38BA820" CornerRadius="8" Padding="12,10">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#F38BA8" FontSize="13" TextWrapping="Wrap"/>
+            </Border>
+        </StackPanel>
+
+        <!-- Actions -->
+        <StackPanel Grid.Row="2" Margin="48,24,48,48" Spacing="12">
+            <Button Content="Get Started"
+                    Command="{Binding CreateAccountCommand}"
+                    IsEnabled="{Binding !IsBusy}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Background="#CBA6F7" Foreground="#1E1E2E"
+                    FontWeight="SemiBold" FontSize="15"
+                    CornerRadius="8" Padding="0,14"/>
+        </StackPanel>
+    </Grid>
+</Window>

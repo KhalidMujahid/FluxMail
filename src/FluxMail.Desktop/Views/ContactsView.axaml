@@ -1,0 +1,129 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             x:Class="FluxMail.Desktop.Views.ContactsView"
+             x:DataType="vm:ContactsViewModel"
+             Background="#1E1E2E">
+
+    <Grid ColumnDefinitions="200,*">
+
+        <!-- Left: Lists sidebar -->
+        <Border Grid.Column="0" Background="#181825" Padding="12,16" BorderThickness="0,0,1,0" BorderBrush="#313244">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Spacing="8">
+                    <TextBlock Text="Lists" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086" Margin="4,0"/>
+
+                    <!-- All Contacts -->
+                    <Button Classes="listBtn" Command="{Binding SelectListCommand}" CommandParameter="{x:Null}">
+                        <TextBlock Text="All Contacts"/>
+                    </Button>
+
+                    <ItemsControl ItemsSource="{Binding Lists}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:ContactList">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Button Grid.Column="0" Classes="listBtn"
+                                            Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).SelectListCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </Button>
+                                    <Button Grid.Column="1" Content="Ã—" FontSize="14" Classes="ghost" Padding="6,2"
+                                            Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).DeleteListCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Separator Background="#313244" Margin="0,4"/>
+
+                    <!-- Create new list -->
+                    <StackPanel IsVisible="{Binding !IsCreatingList}" Spacing="4">
+                        <Button Content="+ New List" Classes="ghost" HorizontalAlignment="Stretch"
+                                Command="{Binding IsCreatingList, Mode=TwoWay}"
+                                Click="OnNewListClick"/>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding IsCreatingList}" Spacing="6">
+                        <TextBox Text="{Binding NewListName}" PlaceholderText="List name" Classes="field"/>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Content="Create" Classes="accent" FontSize="12"
+                                    Command="{Binding CreateListCommand}"/>
+                            <Button Content="Cancel" Classes="ghost" FontSize="12"
+                                    Click="OnCancelListClick"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Right: Contact list -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+            <Grid Grid.Row="0" Margin="24,20,24,12" ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Text="Contacts" FontSize="22" FontWeight="Bold" Foreground="#CDD6F4"/>
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="#A6E3A1"
+                               IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="+ Add Contact" Classes="accent" VerticalAlignment="Center"
+                        Command="{Binding NewContactCommand}"/>
+            </Grid>
+
+            <!-- Contact table -->
+            <ScrollViewer Grid.Row="1" Margin="24,0,24,24" IsVisible="{Binding !IsEditing}">
+                <ItemsControl ItemsSource="{Binding Contacts}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:Contact">
+                            <Border Background="#313244" CornerRadius="8" Margin="0,0,0,6" Padding="16,10">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontSize="14" Foreground="#CDD6F4"/>
+                                        <TextBlock Text="{Binding Email}" FontSize="12" Foreground="#6C7086"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding Company}" Foreground="#6C7086"
+                                               FontSize="12" VerticalAlignment="Center" Margin="16,0"/>
+                                    <Button Grid.Column="2" Content="Edit" Classes="ghost" Margin="4,0"
+                                            Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).EditContactCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="3" Content="Delete" Classes="danger"
+                                            Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).DeleteContactCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <TextBlock Grid.Row="1" IsVisible="{Binding !Contacts.Count}"
+                       Text="No contacts yet." Foreground="#6C7086"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+            <!-- Edit Panel -->
+            <ScrollViewer Grid.Row="1" IsVisible="{Binding IsEditing}" Margin="24,0,24,24">
+                <Border Background="#313244" CornerRadius="10" Padding="24" MaxWidth="480">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="Contact Details" FontSize="18" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Name" Classes="label"/>
+                            <TextBox Text="{Binding FormName}" PlaceholderText="Full name" Classes="field"/>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Email *" Classes="label"/>
+                            <TextBox Text="{Binding FormEmail}" PlaceholderText="email@example.com" Classes="field"/>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Company" Classes="label"/>
+                            <TextBox Text="{Binding FormCompany}" PlaceholderText="Optional" Classes="field"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                            <Button Content="Cancel" Command="{Binding CancelEditCommand}" Classes="ghost"/>
+                            <Button Content="Save" Command="{Binding SaveContactCommand}" Classes="accent"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>
+

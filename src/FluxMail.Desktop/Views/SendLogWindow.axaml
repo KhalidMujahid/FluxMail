@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FluxMail.Desktop.ViewModels"
+        x:Class="FluxMail.Desktop.Views.SendLogWindow"
+        x:DataType="vm:SendLogViewModel"
+        Title="FluxMail — Send Log"
+        Width="700" Height="460"
+        CanResize="True"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E2E"
+        Icon="avares://FluxMail.Desktop/Assets/icon.png">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Terminal header bar -->
+        <Border Grid.Row="0" Background="#181825" Padding="18,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Traffic light dots -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                    <Ellipse Width="12" Height="12" Fill="#F38BA8"/>
+                    <Ellipse Width="12" Height="12" Fill="#FAB387"/>
+                    <Ellipse Width="12" Height="12" Fill="#A6E3A1"/>
+                </StackPanel>
+                <!-- Title -->
+                <TextBlock Grid.Column="1" Text="{Binding Title}"
+                           FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- Spinner / done -->
+                <Border Grid.Column="2" CornerRadius="4" Padding="8,3"
+                        IsVisible="{Binding !IsComplete}"
+                        Background="#CBA6F720">
+                    <TextBlock Text="SENDING…" FontSize="10" FontWeight="Bold" Foreground="#CBA6F7"/>
+                </Border>
+                <Border Grid.Column="2" CornerRadius="4" Padding="8,3"
+                        IsVisible="{Binding IsComplete}"
+                        Background="#A6E3A120">
+                    <TextBlock Text="DONE" FontSize="10" FontWeight="Bold" Foreground="#A6E3A1"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Log output -->
+        <ScrollViewer Grid.Row="1" Name="LogScroll"
+                      Background="#1E1E2E" Padding="10,8"
+                      HorizontalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Entries}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:CompileBindings="False">
+                        <TextBlock Text="{Binding Text}"
+                                   Foreground="{Binding Foreground}"
+                                   FontFamily="Cascadia Code,Consolas,Courier New,monospace"
+                                   FontSize="13" Margin="0,1"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#181825" Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding Summary}"
+                           FontSize="12" Foreground="#6C7086"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                <Button Grid.Column="1" Content="Close"
+                        IsVisible="{Binding IsComplete}"
+                        Click="OnClose"
+                        Classes="ghost" Padding="20,8"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

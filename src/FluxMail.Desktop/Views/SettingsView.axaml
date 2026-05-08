@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             x:Class="FluxMail.Desktop.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel"
+             Background="#1E1E2E">
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28,32,28" Spacing="24" MaxWidth="560">
+            <TextBlock Text="Settings" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+
+            <!-- Profile card -->
+            <Border Background="#313244" CornerRadius="10" Padding="24">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,0,0,4">
+                        <Border Width="52" Height="52" CornerRadius="26" Background="#CBA6F720">
+                            <TextBlock Text="{Binding UserInitials}"
+                                       FontSize="20" FontWeight="Bold" Foreground="#CBA6F7"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="Profile" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                            <TextBlock Text="Update your name and email" FontSize="12" Foreground="#6C7086"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Full Name" Classes="label"/>
+                        <TextBox Text="{Binding FullName}" PlaceholderText="Your full name" Classes="field"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Email Address" Classes="label"/>
+                        <TextBox Text="{Binding Email}" PlaceholderText="you@example.com" Classes="field"/>
+                    </StackPanel>
+
+                    <!-- Profile status -->
+                    <Border IsVisible="{Binding ProfileStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                            CornerRadius="8" Padding="12,8">
+                        <Border.Background>
+                            <SolidColorBrush Color="#A6E3A1" Opacity="0.12"/>
+                        </Border.Background>
+                        <TextBlock Text="{Binding ProfileStatus}" FontSize="13"
+                                   Foreground="#A6E3A1"/>
+                    </Border>
+
+                    <Button Content="Save Profile"
+                            Command="{Binding SaveProfileCommand}"
+                            Classes="accent" HorizontalAlignment="Left" Padding="20,9"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Password card -->
+            <Border Background="#313244" CornerRadius="10" Padding="24">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="2" Margin="0,0,0,4">
+                        <TextBlock Text="Change Password" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                        <TextBlock Text="Leave blank to keep your current password" FontSize="12" Foreground="#6C7086"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Current Password" Classes="label"/>
+                        <TextBox Text="{Binding CurrentPassword}" PasswordChar="●" Classes="field"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="New Password" Classes="label"/>
+                        <TextBox Text="{Binding NewPassword}" PasswordChar="●"
+                                 PlaceholderText="At least 6 characters" Classes="field"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Confirm New Password" Classes="label"/>
+                        <TextBox Text="{Binding ConfirmNewPassword}" PasswordChar="●" Classes="field"/>
+                    </StackPanel>
+
+                    <!-- Password status -->
+                    <Border IsVisible="{Binding PasswordStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                            CornerRadius="8" Padding="12,8">
+                        <Border.Background>
+                            <SolidColorBrush Color="#A6E3A1" Opacity="0.12"/>
+                        </Border.Background>
+                        <TextBlock Text="{Binding PasswordStatus}" FontSize="13"
+                                   Foreground="#A6E3A1"/>
+                    </Border>
+
+                    <Button Content="Change Password"
+                            Command="{Binding ChangePasswordCommand}"
+                            Classes="accent" HorizontalAlignment="Left" Padding="20,9"/>
+                </StackPanel>
+            </Border>
+
+            <!-- App info -->
+            <Border Background="#313244" CornerRadius="10" Padding="24">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="About FluxMail" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                    <StackPanel Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Version" FontSize="13" Foreground="#6C7086" Width="100"/>
+                            <TextBlock Text="1.0.0" FontSize="13" Foreground="#CDD6F4"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

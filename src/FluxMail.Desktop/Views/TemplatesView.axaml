@@ -1,0 +1,89 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             x:Class="FluxMail.Desktop.Views.TemplatesView"
+             x:DataType="vm:TemplatesViewModel"
+             Background="#1E1E2E">
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" Margin="32,28,32,16" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Text="Templates" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="#A6E3A1"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="+ New Template" Classes="accent" VerticalAlignment="Center"
+                    Command="{Binding NewTemplateCommand}" IsVisible="{Binding !IsEditing}"/>
+        </Grid>
+
+        <!-- Template List -->
+        <ScrollViewer Grid.Row="1" Margin="32,0,32,28" IsVisible="{Binding !IsEditing}">
+            <ItemsControl ItemsSource="{Binding Templates}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:EmailTemplate">
+                        <Border Background="#313244" CornerRadius="10" Margin="0,0,0,10" Padding="20,14">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <StackPanel Grid.Column="0" Spacing="3" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                                    <TextBlock Text="{Binding Subject}" FontSize="12" Foreground="#6C7086"/>
+                                    <TextBlock Text="{Binding UpdatedAt, StringFormat='Updated {0:MMM dd, yyyy}'}"
+                                               FontSize="11" Foreground="#45475A"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="Edit" Classes="ghost" Margin="4,0"
+                                        Command="{Binding $parent[ItemsControl].((vm:TemplatesViewModel)DataContext).EditTemplateCommand}"
+                                        CommandParameter="{Binding}"/>
+                                <Button Grid.Column="2" Content="Delete" Classes="danger"
+                                        Command="{Binding $parent[ItemsControl].((vm:TemplatesViewModel)DataContext).DeleteTemplateCommand}"
+                                        CommandParameter="{Binding}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <TextBlock Grid.Row="1" IsVisible="{Binding !Templates.Count}"
+                   Text="No templates yet. Create your first template."
+                   Foreground="#6C7086" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <!-- Editor -->
+        <ScrollViewer Grid.Row="1" IsVisible="{Binding IsEditing}" Margin="32,0,32,28">
+            <StackPanel Spacing="16" MaxWidth="740">
+                <TextBlock Text="Template Editor" FontSize="18" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                        <TextBlock Text="Template Name" Classes="label"/>
+                        <TextBox Text="{Binding FormName}" PlaceholderText="Welcome Email" Classes="field"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                        <TextBlock Text="Subject" Classes="label"/>
+                        <TextBox Text="{Binding FormSubject}" PlaceholderText="Welcome, {{name}}!" Classes="field"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="HTML Body" Classes="label"/>
+                    <TextBox Text="{Binding FormHtmlBody}" PlaceholderText="&lt;p&gt;Hello {{name}},&lt;/p&gt;"
+                             AcceptsReturn="True" MinHeight="200" TextWrapping="Wrap" Classes="field code"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Plain Text (optional)" Classes="label"/>
+                    <TextBox Text="{Binding FormPlainText}" PlaceholderText="Hello {{name}},"
+                             AcceptsReturn="True" MinHeight="80" TextWrapping="Wrap" Classes="field code"/>
+                </StackPanel>
+
+                <TextBlock Text="Available variables: {{name}}, {{email}}, {{company}}"
+                           FontSize="11" Foreground="#6C7086"/>
+
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                    <Button Content="Cancel" Command="{Binding CancelEditCommand}" Classes="ghost"/>
+                    <Button Content="Save Template" Command="{Binding SaveTemplateCommand}" Classes="accent"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
+

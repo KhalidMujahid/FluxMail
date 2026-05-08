@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FluxMail.Core/FluxMail.Core.csproj" />
+    <Project Path="src/FluxMail.Desktop/FluxMail.Desktop.csproj" />
+    <Project Path="src/FluxMail.Infrastructure/FluxMail.Infrastructure.csproj" />
+  </Folder>
+</Solution>

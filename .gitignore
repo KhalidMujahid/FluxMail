@@ -1,0 +1,45 @@
+# .NET / C# build artifacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+*.swp
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.assets.json
+
+# Publish / installer output
+publish/
+installer/Output/
+
+# SQLite database (runtime data — launch app to regenerate)
+*.db
+*.db-shm
+*.db-wal
+
+# Go CLI build output
+cli/fluxmail.exe
+cli/*.exe
+
+# Go module cache / vendor
+cli/vendor/
+
+# Environment and secrets
+.env
+*.env
+secrets.json
+appsettings.Development.json
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Logs
+*.log
+logs/

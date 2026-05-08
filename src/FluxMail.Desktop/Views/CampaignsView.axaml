@@ -1,0 +1,209 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             x:Class="FluxMail.Desktop.Views.CampaignsView"
+             x:DataType="vm:CampaignsViewModel"
+             Background="#1E1E2E">
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" Margin="32,28,32,16" ColumnDefinitions="*,Auto,Auto">
+            <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Text="Campaigns" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="#A6E3A1"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="Stop" Classes="danger" VerticalAlignment="Center" Margin="0,0,8,0"
+                    Command="{Binding StopCampaignCommand}" IsVisible="{Binding IsSending}"/>
+            <Button Grid.Column="2" Content="+ New Campaign" Classes="accent" VerticalAlignment="Center"
+                    Command="{Binding NewCampaignCommand}" IsVisible="{Binding !IsEditing}"/>
+        </Grid>
+
+        <!-- Campaign List -->
+        <ScrollViewer Grid.Row="1" Margin="32,0,32,28" IsVisible="{Binding !IsEditing}">
+            <StackPanel Spacing="0">
+                <ItemsControl ItemsSource="{Binding Campaigns}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:Campaign">
+                            <Border Background="#313244" CornerRadius="10" Margin="0,0,0,10" Padding="20,14">
+                                <Grid RowDefinitions="Auto,Auto,Auto">
+                                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                                            <TextBlock Text="{Binding Subject}" FontSize="12" Foreground="#6C7086"/>
+                                        </StackPanel>
+
+                                        <!-- Status badge -->
+                                        <Border Grid.Column="1" Background="#45475A40" CornerRadius="6"
+                                                Padding="10,4" VerticalAlignment="Center" Margin="12,0">
+                                            <TextBlock Text="{Binding Status}" FontSize="12" Foreground="#CBA6F7"/>
+                                        </Border>
+
+                                        <Button Grid.Column="2" Content="Send Now"
+                                                Command="{Binding $parent[ItemsControl].((vm:CampaignsViewModel)DataContext).StartCampaignCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="accent" Margin="4,0"
+                                                IsEnabled="{Binding $parent[ItemsControl].((vm:CampaignsViewModel)DataContext).IsSending, Converter={x:Static BoolConverters.Not}}"/>
+                                        <Button Grid.Column="3" Content="Edit"
+                                                Command="{Binding $parent[ItemsControl].((vm:CampaignsViewModel)DataContext).EditCampaignCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="ghost" Margin="4,0"/>
+                                        <Button Grid.Column="4" Content="Delete"
+                                                Command="{Binding $parent[ItemsControl].((vm:CampaignsViewModel)DataContext).DeleteCampaignCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="danger"/>
+                                    </Grid>
+
+                                    <!-- Scheduled time row -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16" Margin="0,6,0,0"
+                                                IsVisible="{Binding ScheduledAt, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <TextBlock Text="{Binding ScheduledAt, StringFormat='Scheduled: {0:g}'}"
+                                                   FontSize="11" Foreground="#89B4FA"/>
+                                        <TextBlock Text="{Binding Recurrence, StringFormat='Repeats: {0}'}"
+                                                   FontSize="11" Foreground="#6C7086"
+                                                   IsVisible="{Binding RecurrenceInterval}"/>
+                                    </StackPanel>
+
+                                    <!-- Progress bar -->
+                                    <Grid Grid.Row="2" Margin="0,10,0,0" ColumnDefinitions="*,Auto"
+                                          IsVisible="{Binding TotalRecipients}">
+                                        <ProgressBar Grid.Column="0" Minimum="0"
+                                                     Maximum="{Binding TotalRecipients}"
+                                                     Value="{Binding SentCount}"
+                                                     Height="6" CornerRadius="3"/>
+                                        <TextBlock Grid.Column="1" Margin="10,0,0,0" FontSize="11" Foreground="#6C7086"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="{}{0}/{1}">
+                                                    <Binding Path="SentCount"/>
+                                                    <Binding Path="TotalRecipients"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock IsVisible="{Binding !Campaigns.Count}"
+                           Text="No campaigns yet. Create your first campaign."
+                           Foreground="#6C7086" HorizontalAlignment="Center" Margin="0,40"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Editor -->
+        <ScrollViewer Grid.Row="1" IsVisible="{Binding IsEditing}" Margin="32,0,32,28">
+            <StackPanel Spacing="16" MaxWidth="680">
+                <TextBlock Text="Campaign Editor" FontSize="18" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                        <TextBlock Text="Campaign Name" Classes="label"/>
+                        <TextBox Text="{Binding FormName}" PlaceholderText="Summer Newsletter" Classes="field"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                        <TextBlock Text="Subject" Classes="label"/>
+                        <TextBox Text="{Binding FormSubject}" PlaceholderText="Check out our latest..." Classes="field"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- From Name override -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="From Name (optional override)" Classes="label"/>
+                    <TextBox Text="{Binding FormFromName}"
+                             PlaceholderText="{Binding FormProviderSenderName}"
+                             Classes="field"/>
+                    <TextBlock Text="Leave empty to use provider's default sender name."
+                               FontSize="11" Foreground="#6C7086"/>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                        <TextBlock Text="Contact List" Classes="label"/>
+                        <ComboBox ItemsSource="{Binding ContactLists}"
+                                  SelectedItem="{Binding FormContactList}"
+                                  HorizontalAlignment="Stretch" Classes="field">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:CompileBindings="False">
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Text="Leave empty to send to all contacts" FontSize="11" Foreground="#6C7086"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                        <TextBlock Text="Provider (optional — uses rotation if blank)" Classes="label"/>
+                        <ComboBox ItemsSource="{Binding Providers}"
+                                  SelectedItem="{Binding FormProvider}"
+                                  HorizontalAlignment="Stretch" Classes="field">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:CompileBindings="False">
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="HTML Body *" Classes="label"/>
+                    <TextBox Text="{Binding FormHtmlBody}"
+                             PlaceholderText="&lt;p&gt;Hello {{name}},&lt;/p&gt;"
+                             AcceptsReturn="True" MinHeight="200"
+                             TextWrapping="Wrap" Classes="field code"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Plain Text (optional)" Classes="label"/>
+                    <TextBox Text="{Binding FormPlainText}"
+                             AcceptsReturn="True" MinHeight="80"
+                             TextWrapping="Wrap" Classes="field code"/>
+                </StackPanel>
+
+                <TextBlock Text="Available variables: {{name}}, {{email}}, {{company}}"
+                           FontSize="11" Foreground="#6C7086"/>
+
+                <!-- Scheduling -->
+                <Separator Background="#45475A"/>
+                <StackPanel Spacing="12">
+                    <CheckBox Content="Schedule this campaign" IsChecked="{Binding FormScheduleEnabled}"
+                              Foreground="#CDD6F4" FontWeight="SemiBold"/>
+                    <StackPanel Spacing="12" IsVisible="{Binding FormScheduleEnabled}">
+                        <Grid ColumnDefinitions="*,*">
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                <TextBlock Text="Send Date (UTC)" Classes="label"/>
+                                <DatePicker SelectedDate="{Binding FormScheduleDate}"
+                                            HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                                <TextBlock Text="Send Time (UTC)" Classes="label"/>
+                                <TimePicker SelectedTime="{Binding FormScheduleTime}"
+                                            HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,120">
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                <TextBlock Text="Recurrence" Classes="label"/>
+                                <ComboBox ItemsSource="{Binding RecurrenceTypes}"
+                                          SelectedItem="{Binding FormRecurrence}"
+                                          HorizontalAlignment="Stretch" Classes="field"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="6" IsVisible="{Binding IsRecurring}">
+                                <TextBlock Text="Every N" Classes="label"/>
+                                <NumericUpDown Value="{Binding FormRecurrenceInterval}"
+                                               Minimum="1" Maximum="365" Classes="field"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                    <Button Content="Cancel" Command="{Binding CancelEditCommand}" Classes="ghost"/>
+                    <Button Content="Save Campaign" Command="{Binding SaveCampaignCommand}" Classes="accent"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

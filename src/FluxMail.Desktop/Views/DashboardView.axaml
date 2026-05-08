@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             x:Class="FluxMail.Desktop.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel"
+             Background="#1E1E2E">
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28,32,28" Spacing="24">
+
+            <TextBlock Text="Dashboard" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+
+            <!-- Stat Cards -->
+            <Grid ColumnDefinitions="*,*,*,*" Margin="0,0,0,0">
+                <Grid.Styles>
+                    <Style Selector="Border.statCard">
+                        <Setter Property="Background" Value="#313244"/>
+                        <Setter Property="CornerRadius" Value="10"/>
+                        <Setter Property="Padding" Value="20,16"/>
+                        <Setter Property="Margin" Value="0,0,12,0"/>
+                    </Style>
+                </Grid.Styles>
+
+                <Border Grid.Column="0" Classes="statCard">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Sent Today" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding SentToday}" FontSize="32" FontWeight="Bold" Foreground="#A6E3A1"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="statCard">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Failed Today" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding FailedToday}" FontSize="32" FontWeight="Bold" Foreground="#F38BA8"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Classes="statCard">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Total Sent" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding TotalSent}" FontSize="32" FontWeight="Bold" Foreground="#89B4FA"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="3" Classes="statCard" Margin="0">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Providers" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding ProviderCount}" FontSize="32" FontWeight="Bold" Foreground="#CBA6F7"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Recent Activity -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Recent Activity" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+
+                <Border Background="#313244" CornerRadius="10">
+                    <ItemsControl ItemsSource="{Binding RecentActivity}" Margin="0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmailLog">
+                                <Border Padding="16,10" BorderThickness="0,0,0,1" BorderBrush="#45475A">
+                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                        <StackPanel Grid.Column="0" Spacing="2">
+                                            <TextBlock Text="{Binding ToEmail}" Foreground="#CDD6F4" FontSize="13"/>
+                                            <TextBlock Text="{Binding Subject}" Foreground="#6C7086" FontSize="11"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding SentAt, StringFormat='{}{0:MMM dd HH:mm}'}"
+                                                   Foreground="#6C7086" FontSize="11" VerticalAlignment="Center" Margin="16,0"/>
+                                        <Border Grid.Column="2" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
+                                            <Border.Styles>
+                                                <Style Selector="Border">
+                                                    <Setter Property="Background" Value="#A6E3A120"/>
+                                                </Style>
+                                            </Border.Styles>
+                                            <TextBlock Text="{Binding Status}" FontSize="11" Foreground="#A6E3A1"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <TextBlock IsVisible="{Binding !RecentActivity.Count}"
+                           Text="No emails sent yet." Foreground="#6C7086"
+                           HorizontalAlignment="Center" Margin="0,16"/>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

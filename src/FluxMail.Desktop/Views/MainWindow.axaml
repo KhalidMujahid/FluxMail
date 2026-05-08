@@ -1,0 +1,180 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FluxMail.Desktop.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="750"
+        x:Class="FluxMail.Desktop.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="avares://FluxMail.Desktop/Assets/icon.png"
+        Title="FluxMail"
+        MinWidth="960" MinHeight="620"
+        Background="#1E1E2E">
+
+    <Grid ColumnDefinitions="230,*">
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="#181825" BorderThickness="0,0,1,0" BorderBrush="#313244">
+            <DockPanel>
+
+                <!-- Logo -->
+                <StackPanel DockPanel.Dock="Top" Margin="20,24,20,20" Orientation="Horizontal" Spacing="12">
+                    <Border Width="36" Height="36" CornerRadius="18" Background="#CBA6F720">
+                        <TextBlock Text="F" FontSize="18" FontWeight="Bold" Foreground="#CBA6F7"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center" Spacing="1">
+                        <TextBlock Text="FluxMail" FontSize="16" FontWeight="Bold" Foreground="#CBA6F7"/>
+                        <TextBlock Text="Email Platform" FontSize="10" Foreground="#6C7086"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- User card at bottom -->
+                <Border DockPanel.Dock="Bottom" Margin="12,0,12,12" Background="#313244" CornerRadius="10" Padding="12,10">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <!-- Avatar -->
+                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#CBA6F730">
+                            <TextBlock Text="{Binding CurrentUser.Initials}"
+                                       FontSize="13" FontWeight="Bold" Foreground="#CBA6F7"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <!-- Name + email -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,4,0" Spacing="1">
+                            <TextBlock Text="{Binding CurrentUser.DisplayName}"
+                                       FontSize="12" FontWeight="SemiBold" Foreground="#CDD6F4"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding CurrentUser.Email}"
+                                       FontSize="10" Foreground="#6C7086"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                        <!-- Logout -->
+                        <Button Grid.Column="2" Command="{Binding LogoutCommand}"
+                                Background="Transparent" Padding="4"
+                                ToolTip.Tip="Sign out">
+                            <TextBlock Text="&#xF3B1;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                       Foreground="#6C7086"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Separator above user card -->
+                <Separator DockPanel.Dock="Bottom" Background="#313244" Margin="12,0"/>
+
+                <!-- Nav Items -->
+                <StackPanel DockPanel.Dock="Top" Margin="8,0,8,0" Spacing="2">
+
+                    <!-- Section: Main -->
+                    <TextBlock Text="MAIN" FontSize="10" Foreground="#45475A" Margin="12,8,0,4" FontWeight="SemiBold"/>
+
+                    <Button Command="{Binding NavigateToDashboardCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding NavigateToComposeCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE715;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Compose" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding NavigateToCampaignsCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE789;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Campaigns" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Section: Manage -->
+                    <TextBlock Text="MANAGE" FontSize="10" Foreground="#45475A" Margin="12,12,0,4" FontWeight="SemiBold"/>
+
+                    <Button Command="{Binding NavigateToProvidersCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE703;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Providers" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding NavigateToContactsCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Contacts" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding NavigateToTemplatesCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Templates" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Section: Intelligence -->
+                    <TextBlock Text="INTELLIGENCE" FontSize="10" Foreground="#45475A" Margin="12,12,0,4" FontWeight="SemiBold"/>
+
+                    <Button Command="{Binding NavigateToAnalyticsCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Analytics" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding NavigateToLogsCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE9F5;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Logs &amp; Queue" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding NavigateToInfraCheckCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Infra Checker" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Section: Account -->
+                    <TextBlock Text="ACCOUNT" FontSize="10" Foreground="#45475A" Margin="12,12,0,4" FontWeight="SemiBold"/>
+
+                    <Button Command="{Binding NavigateToSettingsCommand}" Classes="navBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center"/>
+                            <TextBlock Text="Settings" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+            </DockPanel>
+        </Border>
+
+        <!-- Main Content + Toast overlay -->
+        <Panel Grid.Column="1">
+            <ContentControl Content="{Binding CurrentPage}"/>
+
+            <!-- Toast notifications overlay (bottom-right) -->
+            <ItemsControl ItemsSource="{Binding Toasts}"
+                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                          Margin="0,0,20,20" IsHitTestVisible="False" ZIndex="99">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:CompileBindings="False">
+                        <Border Margin="0,6,0,0" CornerRadius="10"
+                                Background="#252537"
+                                MinWidth="280" MaxWidth="420">
+                            <StackPanel Orientation="Horizontal" Margin="14,11">
+                                <TextBlock Text="{Binding Icon}"
+                                           FontSize="16" Foreground="{Binding Background}"
+                                           VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <TextBlock Text="{Binding Message}"
+                                           FontSize="13" Foreground="#CDD6F4"
+                                           TextWrapping="Wrap" VerticalAlignment="Center"
+                                           MaxWidth="360"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Panel>
+    </Grid>
+</Window>

@@ -1,0 +1,143 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             xmlns:conv="using:FluxMail.Desktop.Converters"
+             x:Class="FluxMail.Desktop.Views.InfraCheckView"
+             x:DataType="vm:InfraCheckViewModel"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <conv:BoolToBrushConverter x:Key="BoolToBrush"/>
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28,32,28" Spacing="24" MaxWidth="720">
+            <TextBlock Text="Infrastructure Checker" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+
+            <!-- SMTP Test -->
+            <Border Background="#313244" CornerRadius="10" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="SMTP Connection Test" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Provider" Classes="label"/>
+                        <ComboBox ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}"
+                                  HorizontalAlignment="Stretch" Classes="field">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:EmailProviderConfig">
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <Button Content="Test SMTP Connection" Classes="ghost" Command="{Binding CheckSmtpCommand}"
+                            IsEnabled="{Binding !IsChecking}"/>
+                    <StackPanel IsVisible="{Binding SmtpStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Spacing="6">
+                        <TextBlock Text="{Binding SmtpStatus}" Foreground="#CDD6F4" FontSize="13"/>
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <TextBlock Text="{Binding SmtpConnected, StringFormat='Connection: {0}'}"
+                                       Foreground="{Binding SmtpConnected, Converter={StaticResource BoolToBrush}}" FontSize="12"/>
+                            <TextBlock Text="{Binding SmtpAuthenticated, StringFormat='Auth: {0}'}"
+                                       Foreground="#A6E3A1" FontSize="12"
+                                       IsVisible="{Binding SmtpAuthenticated}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- DNS Check -->
+            <Border Background="#313244" CornerRadius="10" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="DNS / Deliverability Check" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding DnsDomain}" PlaceholderText="example.com"
+                                 Classes="field" Margin="0,0,8,0"/>
+                        <Button Grid.Column="1" Content="Check DNS" Classes="ghost"
+                                Command="{Binding CheckDnsCommand}" IsEnabled="{Binding !IsChecking}"/>
+                    </Grid>
+                    <StackPanel IsVisible="{Binding DnsResult, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Spacing="8">
+                        <TextBlock Text="{Binding DnsResult}" Foreground="#CDD6F4" FontSize="13"/>
+                        <Border Background="#1E1E2E" CornerRadius="6" Padding="14,10">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="SPF" FontSize="12" Foreground="#6C7086" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SpfNote}" Foreground="#CDD6F4" FontSize="12" TextWrapping="Wrap"/>
+                                <TextBlock Text="DKIM" FontSize="12" Foreground="#6C7086" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding DkimNote}" Foreground="#CDD6F4" FontSize="12" TextWrapping="Wrap"/>
+                                <TextBlock Text="DMARC" FontSize="12" Foreground="#6C7086" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding DmarcNote}" Foreground="#CDD6F4" FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Email Verifier -->
+            <Border Background="#313244" CornerRadius="10" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Email Address Verifier" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding VerifyEmail}" PlaceholderText="user@example.com"
+                                 Classes="field" Margin="0,0,8,0"/>
+                        <Button Grid.Column="1" Content="Verify" Classes="ghost"
+                                Command="{Binding VerifyEmailCommand}" IsEnabled="{Binding !IsChecking}"/>
+                    </Grid>
+                    <StackPanel IsVisible="{Binding VerifyResult, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Spacing="6">
+                        <TextBlock Text="{Binding VerifyResult}"
+                                   FontSize="13" FontWeight="SemiBold">
+                            <TextBlock.Foreground>
+                                <SolidColorBrush Color="#A6E3A1"/>
+                            </TextBlock.Foreground>
+                        </TextBlock>
+                        <ItemsControl ItemsSource="{Binding VerifyIssues}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" FontSize="12" Foreground="#F38BA8" Margin="0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Spam Analyzer -->
+            <Border Background="#313244" CornerRadius="10" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Spam Score Analyzer" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Subject" Classes="label"/>
+                        <TextBox Text="{Binding SpamSubject}" PlaceholderText="Your email subject" Classes="field"/>
+                    </StackPanel>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="HTML Body" Classes="label"/>
+                        <TextBox Text="{Binding SpamBody}" PlaceholderText="Email HTML body..."
+                                 AcceptsReturn="True" MinHeight="100" TextWrapping="Wrap" Classes="field code"/>
+                    </StackPanel>
+                    <Button Content="Analyze" Classes="ghost" Command="{Binding AnalyzeSpamAsyncCommand}"/>
+                    <StackPanel IsVisible="{Binding SpamRisk, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{Binding SpamScore, StringFormat='Score: {0}/10'}"
+                                           FontSize="22" FontWeight="Bold" Foreground="#CDD6F4"/>
+                                <TextBlock Text="{Binding SpamRisk, StringFormat='Risk: {0}'}"
+                                           FontSize="13" Foreground="#CBA6F7"/>
+                            </StackPanel>
+                            <ProgressBar Grid.Column="1" Minimum="0" Maximum="10"
+                                         Value="{Binding SpamScore}" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding SpamIssues}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding, StringFormat='âš  {0}'}" FontSize="12"
+                                               Foreground="#FAB387" Margin="0,3"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock IsVisible="{Binding !SpamIssues.Count}"
+                                   Text="No issues detected." FontSize="12" Foreground="#A6E3A1"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

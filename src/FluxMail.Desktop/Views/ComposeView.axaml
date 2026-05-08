@@ -1,0 +1,425 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             x:Class="FluxMail.Desktop.Views.ComposeView"
+             x:DataType="vm:ComposeViewModel"
+             Background="#1E1E2E">
+
+    <UserControl.Styles>
+        <Style Selector="Button.toolbtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="Padding" Value="7,4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="MinWidth" Value="0"/>
+        </Style>
+        <Style Selector="Button.toolbtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#45475A"/>
+        </Style>
+        <!-- Small colored swatch buttons for the color palette -->
+        <Style Selector="Button.colorbtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="3"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="1,0"/>
+        </Style>
+        <Style Selector="Button.colorbtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#45475A"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="*,260">
+
+        <!-- Compose Form -->
+        <ScrollViewer Grid.Column="0" Margin="32,28,16,28">
+            <StackPanel Spacing="16" MaxWidth="680">
+                <TextBlock Text="Compose Email" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+
+                <!-- Mode Toggle -->
+                <Border Background="#313244" CornerRadius="8" Padding="4" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <Button Content="Single Email"
+                                Command="{Binding SetSingleModeCommand}"
+                                Classes.accent="{Binding IsNotBulkMode}"
+                                Classes.ghost="{Binding IsBulkMode}"
+                                Padding="16,7"/>
+                        <Button Content="Bulk Send"
+                                Command="{Binding SetBulkModeCommand}"
+                                Classes.accent="{Binding IsBulkMode}"
+                                Classes.ghost="{Binding IsNotBulkMode}"
+                                Padding="16,7"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Status -->
+                <Border IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                        CornerRadius="8" Padding="14,10">
+                    <Border.Background>
+                        <SolidColorBrush Color="#A6E3A1" Opacity="0.12"/>
+                    </Border.Background>
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="#A6E3A1" FontSize="13"/>
+                </Border>
+
+                <!-- Provider -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Provider" Classes="label"/>
+                    <ComboBox ItemsSource="{Binding Providers}"
+                              SelectedItem="{Binding SelectedProvider}"
+                              HorizontalAlignment="Stretch" Classes="field">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:CompileBindings="False">
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <StackPanel IsVisible="{Binding HasFromInfo}" Spacing="4">
+                        <TextBox Text="{Binding FromNameOverride}"
+                                 PlaceholderText="{Binding FromName}"
+                                 Classes="field"
+                                 FontSize="13"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="From:" FontSize="11" Foreground="#6C7086" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding FromEmail}" FontSize="11" Foreground="#6C7086"/>
+                            <TextBlock Text="· Edit name above to override for this send only."
+                                       FontSize="11" Foreground="#45475A"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Single Mode: To fields -->
+                <Grid ColumnDefinitions="*,*" IsVisible="{Binding IsNotBulkMode}">
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                        <TextBlock Text="To Email *" Classes="label"/>
+                        <TextBox Text="{Binding ToEmail}" PlaceholderText="recipient@example.com" Classes="field"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                        <TextBlock Text="To Name" Classes="label"/>
+                        <TextBox Text="{Binding ToName}" PlaceholderText="John Doe" Classes="field"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Bulk Mode: Recipients -->
+                <StackPanel Spacing="8" IsVisible="{Binding IsBulkMode}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Recipients *" Classes="label" VerticalAlignment="Center"/>
+                        <Border Background="#A6E3A120" CornerRadius="6" Padding="8,3"
+                                IsVisible="{Binding BulkRecipientSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock Text="{Binding BulkRecipientSummary}" FontSize="12" Foreground="#A6E3A1"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBox Text="{Binding BulkEmailsText}"
+                             PlaceholderText="Simple format:&#10;one@example.com&#10;two@example.com&#10;&#10;Per-sender format:&#10;Sender name: John&#10;Email: john@example.com&#10;&#10;Sender name: Jane&#10;Email: jane@example.com"
+                             AcceptsReturn="True" MinHeight="130"
+                             TextWrapping="Wrap" Classes="field code"/>
+                    <TextBlock Text="One email per line, comma/semicolon separated, or use Sender name / Email blocks per recipient."
+                               FontSize="11" Foreground="#6C7086" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Upload .txt" Command="{Binding UploadTextFileCommand}" Classes="ghost" Padding="14,7"/>
+                        <Button Content="Upload .csv" Command="{Binding UploadCsvFileCommand}" Classes="ghost" Padding="14,7"/>
+                        <TextBlock Text="CSV: column named 'email' is used automatically."
+                                   FontSize="11" Foreground="#45475A" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Send delay -->
+                    <Border Background="#313244" CornerRadius="8" Padding="12,10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="Delay between emails" FontSize="13" Foreground="#CDD6F4"/>
+                                <TextBlock Text="Prevents rate limiting. 0 = send immediately with no pause."
+                                           FontSize="11" Foreground="#6C7086"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <NumericUpDown Value="{Binding BulkSendDelaySeconds}"
+                                               Minimum="0" Maximum="300"
+                                               Increment="0.5"
+                                               FormatString="0.#"
+                                               Width="110" Classes="field"/>
+                                <TextBlock Text="seconds" FontSize="13" Foreground="#6C7086" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- Subject -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Subject *" Classes="label"/>
+                    <TextBox Text="{Binding Subject}" PlaceholderText="Your email subject" Classes="field"/>
+                </StackPanel>
+
+                <!-- Reply To -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Reply-To (optional)" Classes="label"/>
+                    <TextBox Text="{Binding ReplyTo}" PlaceholderText="reply@example.com" Classes="field"/>
+                </StackPanel>
+
+                <!-- Editor mode toggle + body editors -->
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <TextBlock Text="Email Body *" Classes="label" VerticalAlignment="Center"/>
+                        <Border Background="#313244" CornerRadius="6" Padding="3">
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                <Button Content="Rich Text"
+                                        Command="{Binding SetPlainModeCommand}"
+                                        Classes.accent="{Binding IsPlainMode}"
+                                        Classes.ghost="{Binding IsHtmlMode}"
+                                        Padding="10,4" FontSize="11"/>
+                                <Button Content="HTML Source"
+                                        Command="{Binding SetHtmlModeCommand}"
+                                        Classes.accent="{Binding IsHtmlMode}"
+                                        Classes.ghost="{Binding IsPlainMode}"
+                                        Padding="10,4" FontSize="11"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Toolbar + editors in one joined block -->
+                    <StackPanel Spacing="0">
+
+                        <!-- ── Shared formatting toolbar ─────────────────────────────────── -->
+                        <Border Background="#252537" CornerRadius="8,8,0,0" Padding="8,7"
+                                BorderBrush="#45475A" BorderThickness="1,1,1,0">
+                            <StackPanel Spacing="5">
+
+                                <!-- Row 1: Text style + headings + blocks + insert -->
+                                <WrapPanel Orientation="Horizontal">
+                                    <Button Classes="toolbtn" FontWeight="Bold"  Content="B"      ToolTip.Tip="Bold"          Click="OnFmtBold"/>
+                                    <Button Classes="toolbtn" FontStyle="Italic" Content="I"      ToolTip.Tip="Italic"        Click="OnFmtItalic"/>
+                                    <Button Classes="toolbtn"                    Content="U"      ToolTip.Tip="Underline"     Click="OnFmtUnderline"/>
+                                    <Button Classes="toolbtn"                    Content="S̶"      ToolTip.Tip="Strikethrough" Click="OnFmtStrike"/>
+                                    <Border Width="1" Background="#45475A" Margin="6,2"/>
+                                    <Button Classes="toolbtn"                    Content="&lt;&gt; Code" ToolTip.Tip="Inline code"  Click="OnFmtCode"/>
+                                    <Button Classes="toolbtn"                    Content="Pre"    ToolTip.Tip="Code block"    Click="OnFmtPre"/>
+                                    <Border Width="1" Background="#45475A" Margin="6,2"/>
+                                    <Button Classes="toolbtn"                    Content="H1"     ToolTip.Tip="Heading 1"     Click="OnFmtH1"/>
+                                    <Button Classes="toolbtn"                    Content="H2"     ToolTip.Tip="Heading 2"     Click="OnFmtH2"/>
+                                    <Button Classes="toolbtn"                    Content="H3"     ToolTip.Tip="Heading 3"     Click="OnFmtH3"/>
+                                    <Border Width="1" Background="#45475A" Margin="6,2"/>
+                                    <Button Classes="toolbtn"                    Content="• UL"   ToolTip.Tip="Bullet list"   Click="OnFmtUL"/>
+                                    <Button Classes="toolbtn"                    Content="1. OL"  ToolTip.Tip="Numbered list" Click="OnFmtOL"/>
+                                    <Border Width="1" Background="#45475A" Margin="6,2"/>
+                                    <Button Classes="toolbtn"                    Content="❝ Quote" ToolTip.Tip="Blockquote"   Click="OnFmtQuote"/>
+                                    <Button Classes="toolbtn"                    Content="— HR"   ToolTip.Tip="Horizontal rule" Click="OnFmtHR"/>
+                                    <Border Width="1" Background="#45475A" Margin="6,2"/>
+                                    <Button Classes="toolbtn"                    Content="🔗 Link" ToolTip.Tip="Hyperlink"    Click="OnFmtLink"/>
+                                    <Button Classes="toolbtn"                    Content="¶ Para" ToolTip.Tip="Paragraph"     Click="OnFmtPara"/>
+                                    <Button Classes="toolbtn"                    Content="Div"    ToolTip.Tip="Div block"     Click="OnFmtDiv"/>
+                                    <Border Width="1" Background="#45475A" Margin="6,2"/>
+                                    <Button Classes="toolbtn"                    Content="🖼 URL"  ToolTip.Tip="Insert image from URL"  Command="{Binding ShowImageUrlInputCommand}"/>
+                                    <Button Classes="toolbtn"                    Content="📁 Image" ToolTip.Tip="Upload image from file" Command="{Binding UploadImageCommand}"/>
+                                </WrapPanel>
+
+                                <!-- Row 2: Font size + alignment -->
+                                <WrapPanel Orientation="Horizontal">
+                                    <TextBlock Text="Size:" FontSize="11" Foreground="#6C7086"
+                                               VerticalAlignment="Center" Margin="4,0,6,0"/>
+                                    <Button Classes="toolbtn" FontSize="9"  Content="12" ToolTip.Tip="12 px" Click="OnFmtSize12"/>
+                                    <Button Classes="toolbtn" FontSize="10" Content="14" ToolTip.Tip="14 px" Click="OnFmtSize14"/>
+                                    <Button Classes="toolbtn" FontSize="11" Content="16" ToolTip.Tip="16 px" Click="OnFmtSize16"/>
+                                    <Button Classes="toolbtn" FontSize="12" Content="18" ToolTip.Tip="18 px" Click="OnFmtSize18"/>
+                                    <Button Classes="toolbtn" FontSize="13" Content="20" ToolTip.Tip="20 px" Click="OnFmtSize20"/>
+                                    <Button Classes="toolbtn" FontSize="14" Content="24" ToolTip.Tip="24 px" Click="OnFmtSize24"/>
+                                    <Button Classes="toolbtn" FontSize="15" Content="28" ToolTip.Tip="28 px" Click="OnFmtSize28"/>
+                                    <Button Classes="toolbtn" FontSize="16" Content="32" ToolTip.Tip="32 px" Click="OnFmtSize32"/>
+                                    <Border Width="1" Background="#45475A" Margin="8,2"/>
+                                    <TextBlock Text="Align:" FontSize="11" Foreground="#6C7086"
+                                               VerticalAlignment="Center" Margin="4,0,6,0"/>
+                                    <Button Classes="toolbtn" Content="≡L" ToolTip.Tip="Align left"    Click="OnFmtAlignLeft"/>
+                                    <Button Classes="toolbtn" Content="≡C" ToolTip.Tip="Align center"  Click="OnFmtAlignCenter"/>
+                                    <Button Classes="toolbtn" Content="≡R" ToolTip.Tip="Align right"   Click="OnFmtAlignRight"/>
+                                    <Button Classes="toolbtn" Content="≡≡" ToolTip.Tip="Justify"        Click="OnFmtAlignJustify"/>
+                                </WrapPanel>
+
+                                <!-- Row 3: Text color + highlight -->
+                                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Color:" FontSize="11" Foreground="#6C7086"
+                                               VerticalAlignment="Center" Margin="4,0,6,0"/>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Black"  Click="OnColorBlack">
+                                        <Rectangle Width="14" Height="14" Fill="#1F2937" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Gray"   Click="OnColorGray">
+                                        <Rectangle Width="14" Height="14" Fill="#6B7280" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Red"    Click="OnColorRed">
+                                        <Rectangle Width="14" Height="14" Fill="#EF4444" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Orange" Click="OnColorOrange">
+                                        <Rectangle Width="14" Height="14" Fill="#F97316" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Yellow" Click="OnColorYellow">
+                                        <Rectangle Width="14" Height="14" Fill="#EAB308" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Green"  Click="OnColorGreen">
+                                        <Rectangle Width="14" Height="14" Fill="#22C55E" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Blue"   Click="OnColorBlue">
+                                        <Rectangle Width="14" Height="14" Fill="#3B82F6" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Purple" Click="OnColorPurple">
+                                        <Rectangle Width="14" Height="14" Fill="#A855F7" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Pink"   Click="OnColorPink">
+                                        <Rectangle Width="14" Height="14" Fill="#EC4899" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="White"  Click="OnColorWhite">
+                                        <Rectangle Width="14" Height="14" Fill="#F8FAFC" RadiusX="3" RadiusY="3"
+                                                   Stroke="#45475A" StrokeThickness="1"/>
+                                    </Button>
+                                    <Border Width="1" Background="#45475A" Margin="8,2"/>
+                                    <TextBlock Text="Highlight:" FontSize="11" Foreground="#6C7086"
+                                               VerticalAlignment="Center" Margin="4,0,6,0"/>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Yellow highlight" Click="OnHighlightYellow">
+                                        <Rectangle Width="14" Height="14" Fill="#FEF08A" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Green highlight"  Click="OnHighlightGreen">
+                                        <Rectangle Width="14" Height="14" Fill="#BBF7D0" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Blue highlight"   Click="OnHighlightBlue">
+                                        <Rectangle Width="14" Height="14" Fill="#BFDBFE" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                    <Button Classes="colorbtn" ToolTip.Tip="Pink highlight"   Click="OnHighlightPink">
+                                        <Rectangle Width="14" Height="14" Fill="#FECDD3" RadiusX="3" RadiusY="3"/>
+                                    </Button>
+                                </WrapPanel>
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Image URL inline input -->
+                        <Border IsVisible="{Binding IsImageUrlInputVisible}"
+                                Background="#1A1A2E"
+                                BorderBrush="#45475A" BorderThickness="1,0,1,1"
+                                Padding="8,7">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBox Grid.Column="0"
+                                         Name="ImageUrlBox"
+                                         Text="{Binding ImageUrlInput}"
+                                         PlaceholderText="https://example.com/image.png"
+                                         Classes="field" FontSize="12" Margin="0,0,6,0"/>
+                                <Button Grid.Column="1" Content="Insert" Classes="accent"
+                                        Command="{Binding InsertImageUrlCommand}"
+                                        Padding="14,5" Margin="0,0,4,0"/>
+                                <Button Grid.Column="2" Content="✕" Classes="ghost"
+                                        Command="{Binding CancelImageUrlCommand}"
+                                        Padding="10,5"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Rich Text editor (Plain mode) — binds to HtmlBody like the source editor -->
+                        <TextBox Name="RichTextEditor"
+                                 IsVisible="{Binding IsPlainMode}"
+                                 Text="{Binding HtmlBody}"
+                                 PlaceholderText="Type your email here. Select text and use the toolbar above to format it."
+                                 AcceptsReturn="True" MinHeight="220"
+                                 TextWrapping="Wrap" Classes="field"
+                                 CornerRadius="0,0,8,8"/>
+
+                        <!-- HTML Source editor -->
+                        <TextBox Name="HtmlBodyEditor"
+                                 IsVisible="{Binding IsHtmlMode}"
+                                 Text="{Binding HtmlBody}"
+                                 PlaceholderText="&lt;p&gt;Your email content here...&lt;/p&gt;"
+                                 AcceptsReturn="True" MinHeight="220"
+                                 TextWrapping="Wrap" Classes="field code"
+                                 CornerRadius="0,0,8,8"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Unsubscribe checkbox -->
+                <Border Background="#CBA6F708" CornerRadius="8" Padding="14,10">
+                    <StackPanel Spacing="4">
+                        <CheckBox Content="Include unsubscribe footer" IsChecked="{Binding IncludeUnsubscribe}"
+                                  Foreground="#CDD6F4"/>
+                        <TextBlock Text="Adds an unsubscribe link at the bottom of the email. Helps avoid spam filters."
+                                   FontSize="11" Foreground="#6C7086" Margin="22,0,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Spam check result -->
+                <Border IsVisible="{Binding SpamChecked}" Background="#313244" CornerRadius="8" Padding="14,12">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock Text="{Binding SpamScore, StringFormat='Spam Score: {0:F1}/10'}"
+                                           FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                                <TextBlock Text="{Binding SpamRisk, StringFormat='Risk: {0}'}"
+                                           FontSize="12" Foreground="#CBA6F7"/>
+                            </StackPanel>
+                            <ProgressBar Grid.Column="1" Minimum="0" Maximum="10" Value="{Binding SpamScore}"
+                                         Width="120" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding SpamIssues}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding, StringFormat='• {0}'}"
+                                               FontSize="12" Foreground="#FAB387" Margin="0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock IsVisible="{Binding !SpamIssues.Count}"
+                                   Text="No spam issues detected." FontSize="12" Foreground="#A6E3A1"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Bulk send progress -->
+                <Border IsVisible="{Binding IsBulkSending}" Background="#313244" CornerRadius="8" Padding="14,12">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="#CDD6F4"/>
+                        <ProgressBar Minimum="0" Maximum="{Binding BulkTotalCount}"
+                                     Value="{Binding BulkSentCount}" Height="6" CornerRadius="3"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Action buttons -->
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                    <Button Content="Check Spam"
+                            Command="{Binding CheckSpamCommand}"
+                            Classes="ghost"
+                            IsEnabled="{Binding !IsSending}"
+                            Padding="16,10"/>
+                    <Button IsVisible="{Binding IsNotBulkMode}"
+                            Content="Send Email"
+                            Command="{Binding SendCommand}"
+                            Classes="accent"
+                            IsEnabled="{Binding !IsSending}"
+                            Padding="20,10"/>
+                    <Button IsVisible="{Binding IsBulkMode}"
+                            Content="{Binding BulkSendButtonText}"
+                            Command="{Binding SendBulkCommand}"
+                            Classes="accent"
+                            IsEnabled="{Binding !IsBulkSending}"
+                            Padding="20,10"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Template Picker -->
+        <Border Grid.Column="1" Background="#181825" BorderThickness="1,0,0,0" BorderBrush="#313244" Padding="16">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Templates" FontSize="14" FontWeight="SemiBold" Foreground="#6C7086"/>
+                <TextBlock Text="Click to apply subject &amp; body" FontSize="11" Foreground="#45475A"/>
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Templates}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmailTemplate">
+                                <Button Classes="ghost" HorizontalAlignment="Stretch" Margin="0,0,0,6"
+                                        Command="{Binding $parent[ItemsControl].((vm:ComposeViewModel)DataContext).ApplyTemplateCommand}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel Spacing="3" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Name}" FontSize="13" Foreground="#CDD6F4"/>
+                                        <TextBlock Text="{Binding Subject}" FontSize="11" Foreground="#6C7086"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <TextBlock IsVisible="{Binding !Templates.Count}"
+                           Text="No templates yet." FontSize="12" Foreground="#45475A"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

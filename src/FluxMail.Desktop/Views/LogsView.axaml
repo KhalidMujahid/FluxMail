@@ -1,0 +1,118 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             x:Class="FluxMail.Desktop.Views.LogsView"
+             x:DataType="vm:LogsViewModel"
+             Background="#1E1E2E">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="32,28,32,0" ColumnDefinitions="*,Auto,Auto">
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Activity Logs" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="#A6E3A1"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="Purge Dead" Classes="danger" VerticalAlignment="Center" Margin="0,0,8,0"
+                    Command="{Binding PurgeDeadCommand}"
+                    IsVisible="{Binding DeadQueueCount}"/>
+            <Button Grid.Column="2" Content="Refresh" Classes="ghost" VerticalAlignment="Center"
+                    Command="{Binding RefreshCommand}"/>
+        </Grid>
+
+        <!-- Stats row -->
+        <Grid Grid.Row="1" Margin="32,16,32,12" ColumnDefinitions="*,*,*">
+            <Border Grid.Column="0" Background="#313244" CornerRadius="8" Padding="16,10" Margin="0,0,8,0">
+                <StackPanel Spacing="2">
+                    <TextBlock Text="Queue Pending" FontSize="11" Foreground="#6C7086"/>
+                    <TextBlock Text="{Binding PendingQueueCount}" FontSize="22" FontWeight="Bold" Foreground="#89B4FA"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Background="#313244" CornerRadius="8" Padding="16,10" Margin="4,0">
+                <StackPanel Spacing="2">
+                    <TextBlock Text="Dead Queue" FontSize="11" Foreground="#6C7086"/>
+                    <TextBlock Text="{Binding DeadQueueCount}" FontSize="22" FontWeight="Bold" Foreground="#F38BA8"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Background="#313244" CornerRadius="8" Padding="16,10" Margin="8,0,0,0">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Filter" FontSize="11" Foreground="#6C7086"/>
+                    <TextBox Text="{Binding FilterText}" PlaceholderText="Search logs..." Classes="field" Padding="8,5"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Tabs via TabControl -->
+        <TabControl Grid.Row="2" Margin="32,0,32,24" Background="Transparent">
+
+            <!-- Email Logs tab -->
+            <TabItem Header="Email Logs" Foreground="#CDD6F4">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmailLog">
+                                <Border Background="#313244" CornerRadius="8" Margin="0,0,0,4" Padding="14,9">
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                                        <!-- Status indicator -->
+                                        <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="#A6E3A1"/>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+
+                                        <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ToEmail}" FontSize="13" Foreground="#CDD6F4"/>
+                                            <TextBlock Text="{Binding Subject}" FontSize="11" Foreground="#6C7086"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="2" Text="{Binding OpenCount, StringFormat='ðŸ‘ {0}'}"
+                                                   Foreground="#89B4FA" FontSize="11" VerticalAlignment="Center" Margin="8,0"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding ClickCount, StringFormat='ðŸ”— {0}'}"
+                                                   Foreground="#CBA6F7" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
+                                        <TextBlock Grid.Column="4" Text="{Binding SentAt, StringFormat='{}{0:MMM dd HH:mm}'}"
+                                                   Foreground="#45475A" FontSize="11" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Queue tab -->
+            <TabItem Header="Queue" Foreground="#CDD6F4">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding QueueItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmailQueueItem">
+                                <Border Background="#313244" CornerRadius="8" Margin="0,0,0,4" Padding="14,9">
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                        <Border Grid.Column="0" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="#45475A"/>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding Status}" FontSize="11" Foreground="#CBA6F7"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ToEmail}" FontSize="13" Foreground="#CDD6F4"/>
+                                            <TextBlock Text="{Binding Subject}" FontSize="11" Foreground="#6C7086"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding RetryCount, StringFormat='Retry: {0}'}"
+                                                   Foreground="#F38BA8" FontSize="11" VerticalAlignment="Center" Margin="8,0"
+                                                   IsVisible="{Binding RetryCount}"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding CreatedAt, StringFormat='{}{0:HH:mm}'}"
+                                                   Foreground="#45475A" FontSize="11" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
+

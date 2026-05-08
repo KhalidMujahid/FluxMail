@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:conv="using:FluxMail.Desktop.Converters"
+             x:Class="FluxMail.Desktop.Views.AnalyticsView"
+             x:DataType="vm:AnalyticsViewModel"
+             Background="#1E1E2E">
+
+    <UserControl.Resources>
+        <conv:BoolToYesNoConverter x:Key="BoolToYesNo"/>
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="32,28,32,28" Spacing="24">
+            <TextBlock Text="Analytics" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+
+            <!-- Summary cards -->
+            <Grid ColumnDefinitions="*,*,*,*">
+                <Border Grid.Column="0" Background="#313244" CornerRadius="10" Padding="18,14" Margin="0,0,10,0">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Total Sent" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding TotalSent}" FontSize="28" FontWeight="Bold" Foreground="#A6E3A1"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Background="#313244" CornerRadius="10" Padding="18,14" Margin="5,0">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Total Opens" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding TotalOpens}" FontSize="28" FontWeight="Bold" Foreground="#89B4FA"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Background="#313244" CornerRadius="10" Padding="18,14" Margin="5,0">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Total Clicks" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding TotalClicks}" FontSize="28" FontWeight="Bold" Foreground="#CBA6F7"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="3" Background="#313244" CornerRadius="10" Padding="18,14" Margin="10,0,0,0">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Failed Today" FontSize="12" Foreground="#6C7086"/>
+                        <TextBlock Text="{Binding TotalFailed}" FontSize="28" FontWeight="Bold" Foreground="#F38BA8"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Campaign performance table -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Campaign Performance" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                <Border Background="#313244" CornerRadius="10">
+                    <StackPanel>
+                        <Grid ColumnDefinitions="*,80,60,60,60,70,70,70" Margin="16,10">
+                            <TextBlock Grid.Column="0" Text="Campaign" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1" Text="Status" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="2" Text="Total" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="3" Text="Sent" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="4" Text="Failed" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="5" Text="Delivery%" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="6" Text="Open%" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="7" Text="Click%" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding CampaignStats}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CampaignAnalytics">
+                                    <Border Padding="16,10" BorderThickness="0,1,0,0" BorderBrush="#45475A">
+                                        <Grid ColumnDefinitions="*,80,60,60,60,70,70,70">
+                                            <TextBlock Grid.Column="0" Text="{Binding CampaignName}" FontSize="13" Foreground="#CDD6F4" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Status}" FontSize="11" Foreground="#CBA6F7" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding TotalRecipients}" FontSize="13" Foreground="#CDD6F4" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Sent}" FontSize="13" Foreground="#A6E3A1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="4" Text="{Binding Failed}" FontSize="13" Foreground="#F38BA8" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="5" Text="{Binding DeliveryRate, StringFormat='{}{0}%'}" FontSize="13" Foreground="#89B4FA" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="6" Text="{Binding OpenRate, StringFormat='{}{0}%'}" FontSize="13" Foreground="#A6E3A1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="7" Text="{Binding ClickRate, StringFormat='{}{0}%'}" FontSize="13" Foreground="#CBA6F7" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <TextBlock IsVisible="{Binding !CampaignStats.Count}" Text="No campaign data yet."
+                           Foreground="#6C7086" HorizontalAlignment="Center" Margin="0,16"/>
+            </StackPanel>
+
+            <!-- Provider health table -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Provider Health" FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                <Border Background="#313244" CornerRadius="10">
+                    <StackPanel>
+                        <Grid ColumnDefinitions="*,80,60,60,60,80" Margin="16,10">
+                            <TextBlock Grid.Column="0" Text="Provider" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1" Text="Type" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="2" Text="Weight" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="3" Text="Default" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="4" Text="Active" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="5" Text="Daily Limit" FontSize="11" Foreground="#6C7086" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding ProviderStats}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ProviderAnalytics">
+                                    <Border Padding="16,10" BorderThickness="0,1,0,0" BorderBrush="#45475A">
+                                        <Grid ColumnDefinitions="*,80,60,60,60,80">
+                                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13" Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Type}" FontSize="11" Foreground="#CBA6F7" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding Weight}" FontSize="13" Foreground="#89B4FA" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding IsDefault, Converter={StaticResource BoolToYesNo}}" FontSize="12" Foreground="#A6E3A1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="4" Text="{Binding IsEnabled, Converter={StaticResource BoolToYesNo}}" FontSize="12" Foreground="#A6E3A1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="5" Text="{Binding DailyLimit}" FontSize="13" Foreground="#6C7086" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

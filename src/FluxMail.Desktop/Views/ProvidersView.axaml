@@ -1,0 +1,230 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FluxMail.Desktop.ViewModels"
+             xmlns:models="using:FluxMail.Core.Models"
+             x:Class="FluxMail.Desktop.Views.ProvidersView"
+             x:DataType="vm:ProvidersViewModel"
+             Background="#1E1E2E">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="32,28,32,16" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Text="Email Providers" FontSize="26" FontWeight="Bold" Foreground="#CDD6F4"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="#A6E3A1"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+            <Button Grid.Column="1" Command="{Binding NewProviderCommand}"
+                    Content="+ Add Provider" Classes="accent" VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Content: List or Editor -->
+        <Grid Grid.Row="1" Margin="32,0,32,28">
+
+            <!-- Provider List -->
+            <ScrollViewer IsVisible="{Binding !IsEditing}">
+                <StackPanel Spacing="0">
+                    <ItemsControl ItemsSource="{Binding Providers}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmailProviderConfig">
+                                <Border Background="#313244" CornerRadius="10" Margin="0,0,0,10" Padding="20,14">
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
+                                        <!-- Type badge -->
+                                        <Border Grid.Column="0" Background="#CBA6F720" CornerRadius="6"
+                                                Padding="8,4" VerticalAlignment="Center" Margin="0,0,14,0">
+                                            <TextBlock Text="{Binding Type}" FontSize="12" Foreground="#CBA6F7"/>
+                                        </Border>
+
+                                        <!-- Info -->
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                                                <Border IsVisible="{Binding IsDefault}" Background="#A6E3A120"
+                                                        CornerRadius="4" Padding="6,2">
+                                                    <TextBlock Text="default" FontSize="10" Foreground="#A6E3A1"/>
+                                                </Border>
+                                                <Border IsVisible="{Binding !IsEnabled}" Background="#F38BA820"
+                                                        CornerRadius="4" Padding="6,2">
+                                                    <TextBlock Text="disabled" FontSize="10" Foreground="#F38BA8"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                                <TextBlock Text="{Binding SenderEmail}" FontSize="12" Foreground="#6C7086"/>
+                                                <TextBlock Text="{Binding ProviderWeight, StringFormat='weight: {0}'}"
+                                                           FontSize="11" Foreground="#45475A"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Actions -->
+                                        <Button Grid.Column="2" Content="Test"
+                                                Command="{Binding $parent[ItemsControl].((vm:ProvidersViewModel)DataContext).TestConnectionCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="ghost" Margin="4,0"/>
+                                        <Button Grid.Column="3" Content="Default"
+                                                Command="{Binding $parent[ItemsControl].((vm:ProvidersViewModel)DataContext).SetDefaultCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="ghost" Margin="4,0"/>
+                                        <Button Grid.Column="4" Content="Edit"
+                                                Command="{Binding $parent[ItemsControl].((vm:ProvidersViewModel)DataContext).EditProviderCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="ghost" Margin="4,0"/>
+                                        <Button Grid.Column="5" Content="Delete"
+                                                Command="{Binding $parent[ItemsControl].((vm:ProvidersViewModel)DataContext).DeleteProviderCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="danger"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock IsVisible="{Binding !Providers.Count}"
+                               Text="No providers configured. Click '+ Add Provider' to get started."
+                               Foreground="#6C7086" HorizontalAlignment="Center" Margin="0,40"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Editor Panel -->
+            <ScrollViewer IsVisible="{Binding IsEditing}">
+                <Border Background="#313244" CornerRadius="10" Padding="24" MaxWidth="600">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="{Binding SelectedProvider, Converter={x:Static ObjectConverters.IsNull}, ConverterParameter='Add Provider|Edit Provider'}"
+                                   FontSize="18" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+
+                        <!-- Common fields -->
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                                <TextBlock Text="Display Name" Classes="label"/>
+                                <TextBox Text="{Binding FormName}" PlaceholderText="My SMTP Server" Classes="field"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                                <TextBlock Text="Provider Type" Classes="label"/>
+                                <ComboBox ItemsSource="{Binding ProviderTypes}"
+                                          SelectedItem="{Binding FormType}"
+                                          HorizontalAlignment="Stretch" Classes="field"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                <TextBlock Text="Sender Name" Classes="label"/>
+                                <TextBox Text="{Binding FormSenderName}" PlaceholderText="FluxMail" Classes="field"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                                <TextBlock Text="Sender Email" Classes="label"/>
+                                <TextBox Text="{Binding FormSenderEmail}" PlaceholderText="hello@example.com" Classes="field"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Rotation settings -->
+                        <Separator Background="#45475A"/>
+                        <TextBlock Text="Rotation &amp; Limits" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"/>
+                        <Grid ColumnDefinitions="80,*,*,Auto">
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                <TextBlock Text="Weight" Classes="label"/>
+                                <NumericUpDown Value="{Binding FormWeight}" Minimum="1" Maximum="100" Classes="field"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="0,0,8,0" Spacing="6">
+                                <TextBlock Text="Daily Limit" Classes="label"/>
+                                <TextBox Text="{Binding FormDailyLimit}" PlaceholderText="e.g. 500" Classes="field"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="0,0,8,0" Spacing="6">
+                                <TextBlock Text="Sends/min" Classes="label"/>
+                                <TextBox Text="{Binding FormSendsPerMinute}" PlaceholderText="e.g. 10" Classes="field"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Spacing="6" VerticalAlignment="Bottom">
+                                <CheckBox Content="Enabled" IsChecked="{Binding FormIsEnabled}" Foreground="#CDD6F4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- SMTP credentials -->
+                        <StackPanel Spacing="12" IsVisible="{Binding IsSmtpType}">
+                            <Separator Background="#45475A"/>
+                            <TextBlock Text="SMTP Settings" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"/>
+                            <Grid ColumnDefinitions="*,120">
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                    <TextBlock Text="SMTP Host" Classes="label"/>
+                                    <TextBox Text="{Binding FormSmtpHost}" PlaceholderText="smtp.gmail.com" Classes="field"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="6">
+                                    <TextBlock Text="Port" Classes="label"/>
+                                    <NumericUpDown Value="{Binding FormSmtpPort}" Minimum="1" Maximum="65535" Classes="field"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                    <TextBlock Text="Username" Classes="label"/>
+                                    <TextBox Text="{Binding FormSmtpUsername}" PlaceholderText="user@example.com" Classes="field"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                                    <TextBlock Text="Password" Classes="label"/>
+                                    <TextBox Text="{Binding FormSmtpPassword}" PasswordChar="•" Classes="field"/>
+                                </StackPanel>
+                            </Grid>
+                            <CheckBox Content="Use TLS/SSL (StartTLS)" IsChecked="{Binding FormSmtpUseSsl}" Foreground="#CDD6F4"/>
+                        </StackPanel>
+
+                        <!-- Resend credentials -->
+                        <StackPanel Spacing="12" IsVisible="{Binding IsResendType}">
+                            <Separator Background="#45475A"/>
+                            <TextBlock Text="Resend Settings" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"/>
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="API Key" Classes="label"/>
+                                <TextBox Text="{Binding FormResendApiKey}" PlaceholderText="re_..." PasswordChar="•" Classes="field"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- AWS SES credentials -->
+                        <StackPanel Spacing="12" IsVisible="{Binding IsSesType}">
+                            <Separator Background="#45475A"/>
+                            <TextBlock Text="AWS SES Settings" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"/>
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                    <TextBlock Text="Access Key ID" Classes="label"/>
+                                    <TextBox Text="{Binding FormAwsAccessKeyId}" PlaceholderText="AKIA..." Classes="field"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                                    <TextBlock Text="Secret Access Key" Classes="label"/>
+                                    <TextBox Text="{Binding FormAwsSecretAccessKey}" PasswordChar="•" Classes="field"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Region" Classes="label"/>
+                                <TextBox Text="{Binding FormAwsRegion}" PlaceholderText="us-east-1" Classes="field"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- SendGrid credentials -->
+                        <StackPanel Spacing="12" IsVisible="{Binding IsSendGridType}">
+                            <Separator Background="#45475A"/>
+                            <TextBlock Text="SendGrid Settings" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"/>
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="API Key" Classes="label"/>
+                                <TextBox Text="{Binding FormSendGridApiKey}" PlaceholderText="SG...." PasswordChar="•" Classes="field"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Mailgun credentials -->
+                        <StackPanel Spacing="12" IsVisible="{Binding IsMailgunType}">
+                            <Separator Background="#45475A"/>
+                            <TextBlock Text="Mailgun Settings" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"/>
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                                    <TextBlock Text="API Key" Classes="label"/>
+                                    <TextBox Text="{Binding FormMailgunApiKey}" PasswordChar="•" Classes="field"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                                    <TextBlock Text="Domain" Classes="label"/>
+                                    <TextBox Text="{Binding FormMailgunDomain}" PlaceholderText="mg.example.com" Classes="field"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Actions -->
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,4,0,0">
+                            <Button Content="Cancel" Command="{Binding CancelEditCommand}" Classes="ghost"/>
+                            <Button Content="Save Provider" Command="{Binding SaveProviderCommand}" Classes="accent"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>
