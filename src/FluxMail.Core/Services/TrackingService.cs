@@ -16,7 +16,7 @@ public class TrackingService(TrackingConfig config)
             return html;
 
         var pixel = $"<img src=\"{config.TrackingDomain}/track/open/{trackingId}\" " +
-                    "width=\"1\" height=\"1\" border=\"0\" alt=\"\" style=\"display:none!important\" />";
+                    "width=\"1\" height=\"1\" border=\"0\" alt=\"\" style=\"display:none\" />";
 
         return html.Contains("</body>", StringComparison.OrdinalIgnoreCase)
             ? html.Replace("</body>", pixel + "</body>", StringComparison.OrdinalIgnoreCase)

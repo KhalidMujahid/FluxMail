@@ -37,7 +37,7 @@ public partial class ContactsViewModel : ViewModelBase, IAsyncLoadable
     {
         IsLoading = true;
         var contacts = SelectedList is null
-            ? await _repo.GetAllAsync()
+            ? await _repo.GetAllIncludingSuppressedAsync()
             : await _repo.GetByListIdAsync(SelectedList.Id);
         Contacts = new ObservableCollection<Contact>(contacts);
 
@@ -101,6 +101,32 @@ public partial class ContactsViewModel : ViewModelBase, IAsyncLoadable
         await _repo.DeleteAsync(contact.Id);
         await LoadAsync();
         StatusMessage = "Contact deleted.";
+    }
+
+    [RelayCommand]
+    private async Task UnsubscribeContactAsync(Contact contact)
+    {
+        await _repo.UnsubscribeAsync(contact.Id);
+        await LoadAsync();
+        StatusMessage = $"{contact.Email} unsubscribed.";
+    }
+
+    [RelayCommand]
+    private async Task MarkBouncedAsync(Contact contact)
+    {
+        await _repo.MarkBouncedAsync(contact.Id);
+        await LoadAsync();
+        StatusMessage = $"{contact.Email} marked as bounced.";
+    }
+
+    [RelayCommand]
+    private async Task ReactivateContactAsync(Contact contact)
+    {
+        contact.IsUnsubscribed = false;
+        contact.IsBounced = false;
+        await _repo.UpdateAsync(contact);
+        await LoadAsync();
+        StatusMessage = $"{contact.Email} reactivated.";
     }
 
     [RelayCommand]

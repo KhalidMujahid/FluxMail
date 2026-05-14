@@ -75,9 +75,19 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:Contact">
                             <Border Background="#313244" CornerRadius="8" Margin="0,0,0,6" Padding="16,10">
-                                <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto">
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Name}" FontSize="14" Foreground="#CDD6F4"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{Binding Name}" FontSize="14" Foreground="#CDD6F4"/>
+                                            <Border IsVisible="{Binding IsUnsubscribed}" Background="#F38BA820"
+                                                    CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                                <TextBlock Text="unsubscribed" FontSize="10" Foreground="#F38BA8"/>
+                                            </Border>
+                                            <Border IsVisible="{Binding IsBounced}" Background="#FAB38720"
+                                                    CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                                <TextBlock Text="bounced" FontSize="10" Foreground="#FAB387"/>
+                                            </Border>
+                                        </StackPanel>
                                         <TextBlock Text="{Binding Email}" FontSize="12" Foreground="#6C7086"/>
                                     </StackPanel>
                                     <TextBlock Grid.Column="1" Text="{Binding Company}" Foreground="#6C7086"
@@ -85,7 +95,19 @@
                                     <Button Grid.Column="2" Content="Edit" Classes="ghost" Margin="4,0"
                                             Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).EditContactCommand}"
                                             CommandParameter="{Binding}"/>
-                                    <Button Grid.Column="3" Content="Delete" Classes="danger"
+                                    <Button Grid.Column="3" Content="Unsub" Classes="ghost" Margin="4,0"
+                                            IsVisible="{Binding !IsUnsubscribed}"
+                                            Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).UnsubscribeContactCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="3" Content="Reactivate" Classes="ghost" Margin="4,0"
+                                            IsVisible="{Binding IsUnsubscribed}"
+                                            Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).ReactivateContactCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="4" Content="Bounce" Classes="ghost" Margin="4,0"
+                                            IsVisible="{Binding !IsBounced}"
+                                            Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).MarkBouncedCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="5" Content="Delete" Classes="danger"
                                             Command="{Binding $parent[ItemsControl].((vm:ContactsViewModel)DataContext).DeleteContactCommand}"
                                             CommandParameter="{Binding}"/>
                                 </Grid>

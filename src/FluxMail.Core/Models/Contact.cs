@@ -7,6 +7,8 @@ public class Contact
     public string Name { get; set; } = "";
     public string? Company { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsUnsubscribed { get; set; }
+    public bool IsBounced { get; set; }
 
     public List<ContactListMembership> ListMemberships { get; set; } = [];
 }

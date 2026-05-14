@@ -174,7 +174,7 @@ func runBulk(_ *cobra.Command, _ []string) error {
 			FromNameOverride: bulkFromName,
 		}
 
-		result := sender.Send(context.Background(), prov, msg)
+		result := sender.Send(context.Background(), prov, mail.PrepareMessage(msg, prov))
 		if result.Err != nil {
 			fmt.Printf("[%d/%d] ✗  %s — %v\n", i+1, total, r.email, result.Err)
 			failed++

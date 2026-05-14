@@ -8,12 +8,16 @@ namespace FluxMail.Infrastructure.Repositories;
 public class ContactRepository(AppDbContext db) : IContactRepository
 {
     public Task<List<Contact>> GetAllAsync() =>
+        db.Contacts.Where(c => !c.IsUnsubscribed && !c.IsBounced).OrderBy(c => c.Name).ToListAsync();
+
+    public Task<List<Contact>> GetAllIncludingSuppressedAsync() =>
         db.Contacts.OrderBy(c => c.Name).ToListAsync();
 
     public Task<List<Contact>> GetByListIdAsync(int listId) =>
         db.ContactListMemberships
             .Where(m => m.ContactListId == listId)
             .Select(m => m.Contact)
+            .Where(c => !c.IsUnsubscribed && !c.IsBounced)
             .OrderBy(c => c.Name)
             .ToListAsync();
 
@@ -119,5 +123,29 @@ public class ContactRepository(AppDbContext db) : IContactRepository
     {
         var contact = await db.Contacts.FirstOrDefaultAsync(c => c.Email == email);
         return string.IsNullOrWhiteSpace(contact?.Name) ? null : contact.Name;
+    }
+
+    public async Task UnsubscribeAsync(int id)
+    {
+        var contact = await db.Contacts.FindAsync(id);
+        if (contact is null) return;
+        contact.IsUnsubscribed = true;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task UnsubscribeByEmailAsync(string email)
+    {
+        var contact = await db.Contacts.FirstOrDefaultAsync(c => c.Email == email);
+        if (contact is null) return;
+        contact.IsUnsubscribed = true;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task MarkBouncedAsync(int id)
+    {
+        var contact = await db.Contacts.FindAsync(id);
+        if (contact is null) return;
+        contact.IsBounced = true;
+        await db.SaveChangesAsync();
     }
 }

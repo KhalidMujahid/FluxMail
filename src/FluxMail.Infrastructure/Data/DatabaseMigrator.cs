@@ -37,6 +37,14 @@ public static class DatabaseMigrator
         AddColumnSafe(conn, "EmailLogs", "OpenCount", "INTEGER NOT NULL DEFAULT 0");
         AddColumnSafe(conn, "EmailLogs", "ClickCount", "INTEGER NOT NULL DEFAULT 0");
 
+        // Contact suppression columns
+        AddColumnSafe(conn, "Contacts", "IsUnsubscribed", "INTEGER NOT NULL DEFAULT 0");
+        AddColumnSafe(conn, "Contacts", "IsBounced", "INTEGER NOT NULL DEFAULT 0");
+
+        // Provider compliance columns
+        AddColumnSafe(conn, "Providers", "PhysicalAddress", "TEXT NULL");
+        AddColumnSafe(conn, "Providers", "UnsubscribeBaseUrl", "TEXT NULL");
+
         // UserProfiles table — created by EnsureCreated on first run; ensure it exists for upgraded DBs
         EnsureTableSafe(conn, "UserProfiles",
             "\"Id\" INTEGER PRIMARY KEY AUTOINCREMENT, " +

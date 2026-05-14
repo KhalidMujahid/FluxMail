@@ -41,7 +41,9 @@ func GetProviders(db *sql.DB) ([]models.Provider, error) {
 			COALESCE(AwsRegion,'us-east-1'),
 			COALESCE(SendGridApiKey,''),
 			COALESCE(MailgunApiKey,''),
-			COALESCE(MailgunDomain,'')
+			COALESCE(MailgunDomain,''),
+			COALESCE(PhysicalAddress,''),
+			COALESCE(UnsubscribeBaseUrl,'')
 		FROM Providers
 		ORDER BY Id`)
 	if err != nil {
@@ -61,6 +63,7 @@ func GetProviders(db *sql.DB) ([]models.Provider, error) {
 			&p.AwsAccessKeyId, &p.AwsSecretAccessKey, &p.AwsRegion,
 			&p.SendGridApiKey,
 			&p.MailgunApiKey, &p.MailgunDomain,
+			&p.PhysicalAddress, &p.UnsubscribeBaseUrl,
 		); err != nil {
 			return nil, err
 		}
@@ -161,11 +164,15 @@ func GetContacts(db *sql.DB, listID int) ([]models.Contact, error) {
 			FROM Contacts c
 			JOIN ContactListMemberships m ON m.ContactId = c.Id
 			WHERE m.ContactListId = ?
+			  AND COALESCE(c.IsUnsubscribed,0) = 0
+			  AND COALESCE(c.IsBounced,0) = 0
 			ORDER BY c.Email`, listID)
 	} else {
 		rows, err = db.Query(`
 			SELECT Id, Email, COALESCE(Name,''), COALESCE(Company,'')
 			FROM Contacts
+			WHERE COALESCE(IsUnsubscribed,0) = 0
+			  AND COALESCE(IsBounced,0) = 0
 			ORDER BY Email`)
 	}
 	if err != nil {

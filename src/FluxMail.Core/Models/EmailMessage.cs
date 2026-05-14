@@ -9,4 +9,5 @@ public record EmailMessage
     public string? PlainTextBody { get; init; }
     public string? ReplyTo { get; init; }
     public string? FromNameOverride { get; init; }
+    public string? UnsubscribeUrl { get; init; }
 }

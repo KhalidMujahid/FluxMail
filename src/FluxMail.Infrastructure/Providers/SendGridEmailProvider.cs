@@ -41,6 +41,13 @@ public class SendGridEmailProvider : IEmailProvider
             if (!string.IsNullOrEmpty(message.ReplyTo))
                 msg.ReplyTo = new EmailAddress(message.ReplyTo);
 
+            var unsubHeader = !string.IsNullOrEmpty(message.UnsubscribeUrl)
+                ? $"<{message.UnsubscribeUrl}>, <mailto:{config.SenderEmail}?subject=unsubscribe>"
+                : $"<mailto:{config.SenderEmail}?subject=unsubscribe>";
+            msg.AddHeader("List-Unsubscribe", unsubHeader);
+            if (!string.IsNullOrEmpty(message.UnsubscribeUrl))
+                msg.AddHeader("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+
             var client   = new SendGridClient(config.SendGridApiKey ?? "");
             var response = await client.SendEmailAsync(msg, ct);
 

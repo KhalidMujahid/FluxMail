@@ -34,5 +34,8 @@ public class EmailProviderConfig
     public string? MailgunApiKey { get; set; }
     public string? MailgunDomain { get; set; }
 
+    public string? PhysicalAddress { get; set; }
+    public string? UnsubscribeBaseUrl { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

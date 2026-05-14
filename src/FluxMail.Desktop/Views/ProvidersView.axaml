@@ -217,6 +217,24 @@
                             </Grid>
                         </StackPanel>
 
+                        <!-- Compliance -->
+                        <Separator Background="#45475A"/>
+                        <TextBlock Text="Compliance &amp; Deliverability" FontSize="13" FontWeight="SemiBold" Foreground="#6C7086"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Physical Address" Classes="label"/>
+                            <TextBox Text="{Binding FormPhysicalAddress}"
+                                     PlaceholderText="123 Main St, City, Country (shown in email footer)"
+                                     Classes="field"/>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Unsubscribe Page URL (optional)" Classes="label"/>
+                            <TextBox Text="{Binding FormUnsubscribeBaseUrl}"
+                                     PlaceholderText="https://yoursite.com/unsubscribe"
+                                     Classes="field"/>
+                            <TextBlock Text="Leave blank to use mailto: fallback. A ?email= parameter will be appended automatically."
+                                       FontSize="11" Foreground="#6C7086" TextWrapping="Wrap"/>
+                        </StackPanel>
+
                         <!-- Actions -->
                         <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,4,0,0">
                             <Button Content="Cancel" Command="{Binding CancelEditCommand}" Classes="ghost"/>

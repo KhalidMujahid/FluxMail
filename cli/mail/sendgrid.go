@@ -21,9 +21,17 @@ func (s *SendGridSender) Send(_ context.Context, p *models.Provider, msg *models
 	from := mail.NewEmail(fromName, p.SenderEmail)
 	to := mail.NewEmail(msg.ToName, msg.ToEmail)
 
-	m := mail.NewSingleEmail(from, msg.Subject, to, msg.PlainTextBody, msg.HtmlBody)
+	m := mail.NewSingleEmail(from, msg.Subject, to, effectivePlainText(msg), msg.HtmlBody)
 	if msg.ReplyTo != "" {
 		m.ReplyTo = &mail.Email{Address: msg.ReplyTo}
+	}
+
+	if m.Headers == nil {
+		m.Headers = make(map[string]string)
+	}
+	m.Headers["List-Unsubscribe"] = unsubscribeHeader(msg, p)
+	if msg.UnsubscribeUrl != "" {
+		m.Headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
 	}
 
 	client := sendgrid.NewSendClient(p.SendGridApiKey)

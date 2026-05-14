@@ -5,6 +5,7 @@ namespace FluxMail.Core.Interfaces;
 public interface IContactRepository
 {
     Task<List<Contact>> GetAllAsync();
+    Task<List<Contact>> GetAllIncludingSuppressedAsync();
     Task<List<Contact>> GetByListIdAsync(int listId);
     Task<Contact?> GetByIdAsync(int id);
     Task<int> AddAsync(Contact contact);
@@ -21,4 +22,8 @@ public interface IContactRepository
 
     Task<string?> FindListNameForEmailAsync(string email);
     Task<string?> FindNameForEmailAsync(string email);
+
+    Task UnsubscribeAsync(int id);
+    Task UnsubscribeByEmailAsync(string email);
+    Task MarkBouncedAsync(int id);
 }

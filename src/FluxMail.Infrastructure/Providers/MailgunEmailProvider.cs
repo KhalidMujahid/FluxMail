@@ -47,6 +47,13 @@ public class MailgunEmailProvider(IHttpClientFactory httpClientFactory) : IEmail
             if (message.PlainTextBody is not null)
                 form.Add(new StringContent(message.PlainTextBody), "text");
 
+            var unsubHeader = !string.IsNullOrEmpty(message.UnsubscribeUrl)
+                ? $"<{message.UnsubscribeUrl}>, <mailto:{config.SenderEmail}?subject=unsubscribe>"
+                : $"<mailto:{config.SenderEmail}?subject=unsubscribe>";
+            form.Add(new StringContent(unsubHeader), "h:List-Unsubscribe");
+            if (!string.IsNullOrEmpty(message.UnsubscribeUrl))
+                form.Add(new StringContent("List-Unsubscribe=One-Click"), "h:List-Unsubscribe-Post");
+
             var response = await client.PostAsync(
                 $"https://api.mailgun.net/v3/{config.MailgunDomain}/messages", form, ct);
 

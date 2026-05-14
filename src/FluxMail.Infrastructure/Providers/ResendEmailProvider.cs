@@ -49,6 +49,14 @@ public class ResendEmailProvider(IHttpClientFactory httpClientFactory) : IEmailP
             if (!string.IsNullOrEmpty(message.ReplyTo))
                 msg.ReplyTo = message.ReplyTo;
 
+            var unsubHeader = !string.IsNullOrEmpty(message.UnsubscribeUrl)
+                ? $"<{message.UnsubscribeUrl}>, <mailto:{config.SenderEmail}?subject=unsubscribe>"
+                : $"<mailto:{config.SenderEmail}?subject=unsubscribe>";
+            msg.Headers ??= new Dictionary<string, string>();
+            msg.Headers["List-Unsubscribe"] = unsubHeader;
+            if (!string.IsNullOrEmpty(message.UnsubscribeUrl))
+                msg.Headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
+
             var response = await resend.EmailSendAsync(msg, ct);
 
             if (response.Success)

@@ -19,12 +19,17 @@ func (s *ResendSender) Send(_ context.Context, p *models.Provider, msg *models.M
 		To:      []string{formatAddress(msg.ToName, msg.ToEmail)},
 		Subject: msg.Subject,
 		Html:    msg.HtmlBody,
-	}
-	if msg.PlainTextBody != "" {
-		params.Text = msg.PlainTextBody
+		Text:    effectivePlainText(msg),
 	}
 	if msg.ReplyTo != "" {
 		params.ReplyTo = msg.ReplyTo
+	}
+
+	params.Headers = map[string]string{
+		"List-Unsubscribe": unsubscribeHeader(msg, p),
+	}
+	if msg.UnsubscribeUrl != "" {
+		params.Headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
 	}
 
 	sent, err := client.Emails.Send(params)

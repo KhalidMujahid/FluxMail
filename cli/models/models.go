@@ -18,8 +18,10 @@ type Provider struct {
 	AwsSecretAccessKey string
 	AwsRegion          string
 	SendGridApiKey string
-	MailgunApiKey string
-	MailgunDomain string
+	MailgunApiKey        string
+	MailgunDomain        string
+	PhysicalAddress      string
+	UnsubscribeBaseUrl   string
 }
 
 type Template struct {
@@ -31,10 +33,12 @@ type Template struct {
 }
 
 type Contact struct {
-	ID      int
-	Email   string
-	Name    string
-	Company string
+	ID             int
+	Email          string
+	Name           string
+	Company        string
+	IsUnsubscribed bool
+	IsBounced      bool
 }
 
 type ContactList struct {
@@ -43,13 +47,14 @@ type ContactList struct {
 }
 
 type Message struct {
-	ToEmail         string
-	ToName          string
-	Subject         string
-	HtmlBody        string
-	PlainTextBody   string
-	ReplyTo         string
+	ToEmail          string
+	ToName           string
+	Subject          string
+	HtmlBody         string
+	PlainTextBody    string
+	ReplyTo          string
 	FromNameOverride string
+	UnsubscribeUrl   string
 }
 
 type SendResult struct {

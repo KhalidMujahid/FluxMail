@@ -62,6 +62,13 @@ public class SmtpEmailProvider : IEmailProvider
         if (!string.IsNullOrEmpty(message.ReplyTo))
             mime.ReplyTo.Add(MailboxAddress.Parse(message.ReplyTo));
 
+        var unsubHeader = !string.IsNullOrEmpty(message.UnsubscribeUrl)
+            ? $"<{message.UnsubscribeUrl}>, <mailto:{config.SenderEmail}?subject=unsubscribe>"
+            : $"<mailto:{config.SenderEmail}?subject=unsubscribe>";
+        mime.Headers.Add("List-Unsubscribe", unsubHeader);
+        if (!string.IsNullOrEmpty(message.UnsubscribeUrl))
+            mime.Headers.Add("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+
         var builder = new BodyBuilder
         {
             HtmlBody = message.HtmlBody,

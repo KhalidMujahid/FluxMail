@@ -4,6 +4,7 @@ using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using FluxMail.Core.Interfaces;
 using FluxMail.Core.Models;
+using MimeKit;
 
 namespace FluxMail.Infrastructure.Providers;
 
@@ -26,41 +27,53 @@ public class SesEmailProvider : IEmailProvider
     {
         try
         {
-            var senderName = message.FromNameOverride ?? config.SenderName;
-            var from = string.IsNullOrEmpty(senderName)
-                ? config.SenderEmail ?? ""
-                : $"{senderName} <{config.SenderEmail}>";
+            var mime = BuildMimeMessage(config, message);
 
-            var to = string.IsNullOrEmpty(message.ToName)
-                ? message.ToEmail
-                : $"{message.ToName} <{message.ToEmail}>";
+            using var memStream = new MemoryStream();
+            await mime.WriteToAsync(memStream, ct);
+            memStream.Position = 0;
 
-            var body = new Body { Html = new Content { Charset = "UTF-8", Data = message.HtmlBody } };
-            if (message.PlainTextBody is not null)
-                body.Text = new Content { Charset = "UTF-8", Data = message.PlainTextBody };
-
-            var request = new SendEmailRequest
+            var request = new SendRawEmailRequest
             {
-                Source      = from,
-                Destination = new Destination { ToAddresses = [to] },
-                Message     = new Message
-                {
-                    Subject = new Content { Charset = "UTF-8", Data = message.Subject },
-                    Body    = body
-                }
+                RawMessage = new RawMessage { Data = memStream }
             };
 
-            if (!string.IsNullOrEmpty(message.ReplyTo))
-                request.ReplyToAddresses = [message.ReplyTo];
-
-            using var ses      = CreateClient(config);
-            var       response = await ses.SendEmailAsync(request, ct);
+            using var ses = CreateClient(config);
+            var response = await ses.SendRawEmailAsync(request, ct);
             return new EmailSendResult(true, response.MessageId);
         }
         catch (Exception ex)
         {
             return new EmailSendResult(false, ErrorMessage: ex.Message);
         }
+    }
+
+    private static MimeMessage BuildMimeMessage(EmailProviderConfig config, EmailMessage message)
+    {
+        var mime = new MimeMessage();
+
+        var senderName = message.FromNameOverride ?? config.SenderName;
+        mime.From.Add(new MailboxAddress(senderName, config.SenderEmail));
+        mime.To.Add(new MailboxAddress(message.ToName, message.ToEmail));
+        mime.Subject = message.Subject;
+
+        if (!string.IsNullOrEmpty(message.ReplyTo))
+            mime.ReplyTo.Add(MailboxAddress.Parse(message.ReplyTo));
+
+        var unsubHeader = !string.IsNullOrEmpty(message.UnsubscribeUrl)
+            ? $"<{message.UnsubscribeUrl}>, <mailto:{config.SenderEmail}?subject=unsubscribe>"
+            : $"<mailto:{config.SenderEmail}?subject=unsubscribe>";
+        mime.Headers.Add("List-Unsubscribe", unsubHeader);
+        if (!string.IsNullOrEmpty(message.UnsubscribeUrl))
+            mime.Headers.Add("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+
+        var builder = new BodyBuilder
+        {
+            HtmlBody = message.HtmlBody,
+            TextBody = message.PlainTextBody
+        };
+        mime.Body = builder.ToMessageBody();
+        return mime;
     }
 
     private static AmazonSimpleEmailServiceClient CreateClient(EmailProviderConfig config)

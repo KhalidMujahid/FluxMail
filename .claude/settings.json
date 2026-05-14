@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\\\\src\" -Recurse -Directory)",
+      "WebFetch(domain:spamassassin.apache.org)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Khalid\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Khalid-Documents-FluxMail\\\\78a685d3-b29f-4316-b123-89c27560f3a4\\\\tasks\\\\bumqz4njl.output\" -Wait -Tail 20)",
+      "PowerShell(cd \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\\\\cli\"; $env:GOARCH=\"amd64\"; $env:GOOS=\"windows\"; go build -ldflags=\"-s -w\" -o fluxmail.exe . 2>&1)",
+      "PowerShell(& \"C:\\\\Program Files \\(x86\\)\\\\Inno Setup 6\\\\ISCC.exe\" \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\\\\installer\\\\FluxMail.iss\" 2>&1)",
+      "Read(//c//**)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\" -ErrorAction SilentlyContinue | Select-Object Name)",
+      "WebFetch(domain:www.mail-tester.com)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\" -Directory -Recurse)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Format-Table FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\" -Directory | ForEach-Object { $_.FullName })",
+      "PowerShell(Start-Sleep -Seconds 5; & \"$env:LOCALAPPDATA\\\\Programs\\\\Inno Setup 6\\\\ISCC.exe\" \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\\\\installer\\\\FluxMail.iss\" 2>&1 | Select-String -Pattern \"Successful|Error|Output|aborted\")",
+      "PowerShell($file = \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\\\\installer\\\\FluxMail-Setup-1.0.0-win-x64.exe\"; Get-Process | Where-Object { try { $_.Modules | Where-Object { $_.FileName -eq $file } } catch { $false } } | Select-Object Name, Id)",
+      "PowerShell(& \"$env:LOCALAPPDATA\\\\Programs\\\\Inno Setup 6\\\\ISCC.exe\" \"c:\\\\Users\\\\Khalid\\\\Documents\\\\FluxMail\\\\installer\\\\FluxMail.iss\" 2>&1 | Select-String -Pattern \"Successful|Error|Output|aborted|Compile\")",
+      "Bash(wait)"
+    ]
+  }
+}

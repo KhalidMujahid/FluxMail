@@ -50,6 +50,10 @@ public partial class ProvidersViewModel : ViewModelBase, IAsyncLoadable
     [ObservableProperty] private string _formMailgunApiKey = "";
     [ObservableProperty] private string _formMailgunDomain = "";
 
+    // Compliance
+    [ObservableProperty] private string _formPhysicalAddress = "";
+    [ObservableProperty] private string _formUnsubscribeBaseUrl = "";
+
     public ProviderType[] ProviderTypes { get; } = Enum.GetValues<ProviderType>();
 
     public bool IsSmtpType => FormType == ProviderType.Smtp;
@@ -120,6 +124,9 @@ public partial class ProvidersViewModel : ViewModelBase, IAsyncLoadable
         FormMailgunApiKey = provider.MailgunApiKey ?? "";
         FormMailgunDomain = provider.MailgunDomain ?? "";
 
+        FormPhysicalAddress = provider.PhysicalAddress ?? "";
+        FormUnsubscribeBaseUrl = provider.UnsubscribeBaseUrl ?? "";
+
         IsEditing = true;
     }
 
@@ -159,6 +166,9 @@ public partial class ProvidersViewModel : ViewModelBase, IAsyncLoadable
         config.MailgunApiKey = FormMailgunApiKey;
         config.MailgunDomain = FormMailgunDomain;
 
+        config.PhysicalAddress = string.IsNullOrWhiteSpace(FormPhysicalAddress) ? null : FormPhysicalAddress;
+        config.UnsubscribeBaseUrl = string.IsNullOrWhiteSpace(FormUnsubscribeBaseUrl) ? null : FormUnsubscribeBaseUrl;
+
         if (config.Id == 0)
             await _repo.AddAsync(config);
         else
@@ -189,8 +199,20 @@ public partial class ProvidersViewModel : ViewModelBase, IAsyncLoadable
     private async Task TestConnectionAsync(EmailProviderConfig provider)
     {
         StatusMessage = "Testing connection...";
-        var ok = await _emailService.TestConnectionAsync(provider.Id);
-        StatusMessage = ok ? "Connection successful!" : "Connection failed. Check your settings.";
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            var ok = await _emailService.TestConnectionAsync(provider.Id, cts.Token);
+            StatusMessage = ok ? "Connection successful!" : "Connection failed. Check your settings.";
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = "Connection timed out. Check host/port and try again.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error: {ex.Message}";
+        }
     }
 
     [RelayCommand]
@@ -206,6 +228,7 @@ public partial class ProvidersViewModel : ViewModelBase, IAsyncLoadable
         FormSmtpUsername = FormSmtpPassword = FormResendApiKey =
         FormAwsAccessKeyId = FormAwsSecretAccessKey = FormAwsRegion =
         FormSendGridApiKey = FormMailgunApiKey = FormMailgunDomain =
+        FormPhysicalAddress = FormUnsubscribeBaseUrl =
         FormDailyLimit = FormSendsPerMinute = "";
         FormAwsRegion = "us-east-1";
         FormSmtpPort = 587;

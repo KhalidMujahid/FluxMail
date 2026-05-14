@@ -113,7 +113,7 @@ func runSend(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	result := sender.Send(context.Background(), prov, msg)
+	result := sender.Send(context.Background(), prov, mail.PrepareMessage(msg, prov))
 	if result.Err != nil {
 		return fmt.Errorf("send failed: %w", result.Err)
 	}
